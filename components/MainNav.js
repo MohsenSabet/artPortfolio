@@ -16,6 +16,7 @@ export default function MainNav() {
             <Nav.Link as={Link} href="/portfolio">Portfolio</Nav.Link>
             <NavDropdown title="Dashboard" id="dashboard-nav-dropdown">
               <NavDropdown.Item as={Link} href="/dashboard">Overview</NavDropdown.Item>
+              <NavDropdown.Item as={Link} href="/dashboard/profile">Admin Profile</NavDropdown.Item>
               <NavDropdown.Item as={Link} href="/dashboard/addPost">Add Post</NavDropdown.Item>
               <NavDropdown.Item as={Link} href="/dashboard/editPost">Edit Post</NavDropdown.Item>
               <NavDropdown.Item as={Link} href="/dashboard/managePost">Manage Posts</NavDropdown.Item>
