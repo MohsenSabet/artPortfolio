@@ -5,18 +5,22 @@ import { FaTwitter, FaLinkedin, FaInstagram, FaPhone, FaEnvelope } from 'react-i
 export default function AdminProfile() {
   // Static admin data
   const user = {
-    name: 'Admin User',
+    firstName: 'Admin',
+    lastName: 'User',
+    username: 'adminuser',
     email: 'admin@example.com',
     role: 'Administrator',
     phone: '123-456-7890',
     joined: 'January 1, 2020',
+    pronouns: 'they/them',
     profilePic: 'https://via.placeholder.com/200',
     social: {
       twitter: 'https://twitter.com/admin',
       linkedIn: 'https://linkedin.com/in/admin',
       instagram: 'https://instagram.com/admin',
     },
-    bio: 'Passionate admin with a love for art and design. Enjoys curating beautiful portfolios and engaging with the community.'
+    bio: 'Passionate admin with a love for art and design. Enjoys curating beautiful portfolios and engaging with the community.',
+    mediums: ['Painting', 'Digital', 'Sculpture'],
   };
 
   return (
@@ -26,7 +30,9 @@ export default function AdminProfile() {
           <Card className="text-center h-100" style={{ boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
             <Card.Body>
               <Image src={user.profilePic} roundedCircle fluid style={{ width: '150px', height: '150px', objectFit: 'cover' }} className="mb-3" />
-              <Card.Title style={{ fontSize: '1.5rem' }}>{user.name}</Card.Title>
+              <Card.Title style={{ fontSize: '1.5rem' }}>{user.firstName} {user.lastName}</Card.Title>
+              <div className="mb-1 text-muted">@{user.username}</div>
+              <div className="mb-2 text-muted"><small>{user.pronouns}</small></div>
               <Badge bg="secondary" className="mb-2">{user.role}</Badge>
             </Card.Body>
           </Card>
@@ -59,9 +65,9 @@ export default function AdminProfile() {
               <div>
                 <h5>Mediums</h5>
                 <div>
-                  <Badge bg="light" text="dark" className="me-2">Painting</Badge>
-                  <Badge bg="light" text="dark" className="me-2">Digital</Badge>
-                  <Badge bg="light" text="dark" className="me-2">Sculpture</Badge>
+                  {user.mediums.map((m) => (
+                    <Badge key={m} bg="light" text="dark" className="me-2 mb-1">{m}</Badge>
+                  ))}
                 </div>
               </div>
             </Card.Body>
