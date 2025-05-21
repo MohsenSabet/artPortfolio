@@ -32,32 +32,38 @@ export default function AdminProfile() {
           </Card>
         </Col>
         <Col md={8}>
-          <Card style={{ boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }} className="mb-4">
-            <Card.Header as="h5">Contact Info</Card.Header>
+          <Card className="h-100" style={{ boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
             <Card.Body>
-              <ListGroup variant="flush" className="mb-3">
-                <ListGroup.Item><FaEnvelope className="me-2" />{user.email}</ListGroup.Item>
-                <ListGroup.Item><FaPhone className="me-2" />{user.phone}</ListGroup.Item>
-                <ListGroup.Item><strong>Member Since:</strong> {user.joined}</ListGroup.Item>
-              </ListGroup>
-              <Row className="mb-3">
-                <Col className="text-center">
+              <Row className="justify-content-center mb-3 gx-2">
+                <Col xs="auto">
+                  <Button variant="outline-secondary" size="sm" href={`mailto:${user.email}`}><FaEnvelope /></Button>
+                </Col>
+                <Col xs="auto">
+                  <Button variant="outline-secondary" size="sm" href={`tel:${user.phone}`}><FaPhone /></Button>
+                </Col>
+                <Col xs="auto">
                   <Button variant="outline-primary" size="sm" href={user.social.twitter} target="_blank"><FaTwitter /></Button>
                 </Col>
-                <Col className="text-center">
+                <Col xs="auto">
                   <Button variant="outline-info" size="sm" href={user.social.linkedIn} target="_blank"><FaLinkedin /></Button>
                 </Col>
-                <Col className="text-center">
+                <Col xs="auto">
                   <Button variant="outline-danger" size="sm" href={user.social.instagram} target="_blank"><FaInstagram /></Button>
                 </Col>
               </Row>
-              {/* Edit Profile button removed for now */}
-            </Card.Body>
-          </Card>
-          <Card style={{ boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
-            <Card.Header as="h5">Biography</Card.Header>
-            <Card.Body>
-              <Card.Text>{user.bio}</Card.Text>
+              <hr />
+              <div className="mb-4">
+                <h5>Biography</h5>
+                <Card.Text>{user.bio}</Card.Text>
+              </div>
+              <div>
+                <h5>Mediums</h5>
+                <div>
+                  <Badge bg="light" text="dark" className="me-2">Painting</Badge>
+                  <Badge bg="light" text="dark" className="me-2">Digital</Badge>
+                  <Badge bg="light" text="dark" className="me-2">Sculpture</Badge>
+                </div>
+              </div>
             </Card.Body>
           </Card>
         </Col>
