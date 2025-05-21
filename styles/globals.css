@@ -40,3 +40,21 @@ a {
     color-scheme: dark;
   }
 }
+
+/* Make ReactQuill editor vertically resizable */
+.resizable-quill .ql-container {
+  resize: vertical;
+  overflow: auto;
+  min-height: 150px;
+  max-height: 500px;
+}
+
+/* Make all the text you type come out dark */
+.resizable-quill .ql-editor {
+  color: #212529 !important;   /* bootstrap’s “text-dark” */
+}
+
+/* And if you want every paragraph tag covered: */
+.resizable-quill .ql-editor p {
+  color: #212529 !important;
+}
