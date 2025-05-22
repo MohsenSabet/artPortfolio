@@ -28,6 +28,7 @@ export default function AdminProfile() {
 
   if (loading) return <p>Loading...</p>;
   if (!profile) return <p>No profile found.</p>;
+  const mediumsList = profile.mediums ? profile.mediums.split(',') : [];
 
   return (
     <Container className="mt-5">
@@ -54,13 +55,13 @@ export default function AdminProfile() {
                   <Button variant="outline-secondary" size="sm" href={`tel:${profile.phone}`}><FaPhone /></Button>
                 </Col>
                 <Col xs="auto">
-                  <Button variant="outline-primary" size="sm" href={profile.social_links.twitter} target="_blank"><FaTwitter /></Button>
+                  <Button variant="outline-primary" size="sm" href={profile.twitter} target="_blank"><FaTwitter /></Button>
                 </Col>
                 <Col xs="auto">
-                  <Button variant="outline-info" size="sm" href={profile.social_links.linkedIn} target="_blank"><FaLinkedin /></Button>
+                  <Button variant="outline-info" size="sm" href={profile.linkedin} target="_blank"><FaLinkedin /></Button>
                 </Col>
                 <Col xs="auto">
-                  <Button variant="outline-danger" size="sm" href={profile.social_links.instagram} target="_blank"><FaInstagram /></Button>
+                  <Button variant="outline-danger" size="sm" href={profile.instagram} target="_blank"><FaInstagram /></Button>
                 </Col>
               </Row>
               <hr />
@@ -71,7 +72,7 @@ export default function AdminProfile() {
               <div>
                 <h5>Mediums</h5>
                 <div>
-                  {profile.mediums.map((m) => (
+                  {mediumsList.map((m) => (
                     <Badge key={m} bg="light" text="dark" className="me-2 mb-1">{m}</Badge>
                   ))}
                 </div>
