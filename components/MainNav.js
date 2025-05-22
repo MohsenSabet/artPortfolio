@@ -23,6 +23,10 @@ export default function MainNav() {
               <NavDropdown.Item as={Link} href="/dashboard/managePost">Manage Posts</NavDropdown.Item>
             </NavDropdown>
           </Nav>
+          <Nav className="ms-auto">
+            <Nav.Link as={Link} href="/login">Login</Nav.Link>
+            <Nav.Link as={Link} href="/signup">Sign Up</Nav.Link>
+          </Nav>
         </Navbar.Collapse>
       </Container>
     </Navbar>
