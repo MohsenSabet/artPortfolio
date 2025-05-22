@@ -1,6 +1,7 @@
 import React from 'react';
 import { Container, Row, Col, Badge, Button } from 'react-bootstrap';
 import Link from 'next/link';
+import styles from './ArtworkCard.module.css';
 
 export default function ArtworkCardDetail({ post }) {
   const {
@@ -31,15 +32,13 @@ export default function ArtworkCardDetail({ post }) {
             <video
               controls
               src={media_url}
-              className="img-fluid rounded mb-3"
-              style={{ objectFit: 'cover', width: '100%', height: 'auto' }}
+              className={`img-fluid rounded mb-3 ${styles.mediaContainer}`}
             />
           ) : (
             <img
               src={media_url}
               alt={title}
-              className="img-fluid rounded mb-3"
-              style={{ objectFit: 'cover', width: '100%', height: 'auto' }}
+              className={`img-fluid rounded mb-3 ${styles.mediaContainer}`}
               onError={(e) => { e.currentTarget.src = '/file.svg'; }}
             />
           )}
