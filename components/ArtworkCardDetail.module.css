@@ -1,0 +1,79 @@
+/* Replace entire module for a unified detail card */
+.detailCard {
+  display: flex;              /* use flexbox for layout */
+  flex-direction: column;     /* stack children vertically */
+  width: 100%;                /* full width of the container */
+  max-width: 900px;           /* limit max width for larger screens */
+  margin: 0 auto;            /* center the card */
+  background-color: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;           /* preserve rounded corners */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.pageWrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+.media img,
+.media video {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+}
+.info {
+  padding: 0.75rem;  /* even smaller padding */
+  color: #171717;
+}
+.title {
+  font-size: 1.5rem;  /* more compact title */
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: #111111;
+}
+.badgeGroup {
+  display: flex;
+  gap: 0.25rem;        /* tighter badge spacing */
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem; /* smaller bottom margin */
+}
+.authorSection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.avatarLarge {
+  width: 40px;  /* more compact avatar */
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.description {
+  line-height: 1.6;
+  margin-top: 1rem;
+}
+.backLink {
+  color: var(--foreground);
+  font-weight: bold;
+  text-decoration: none;
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+/* Responsive layout for larger screens */
+@media (min-width: 768px) {
+  .detailCard {
+    flex-direction: row;      /* side by side on larger screens */
+  }
+  .media, .info {
+    width: 50%;              /* equal width for media and info */
+  }
+  .media img,
+  .media video {
+    height: 100%;            /* media covers full height */
+    object-fit: cover;       /* cover area without distortion */
+  }
+}
