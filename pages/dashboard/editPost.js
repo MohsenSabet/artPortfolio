@@ -4,6 +4,8 @@ import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabaseClient';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+import ReactDatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 export default function EditPost() {
   const router = useRouter();
@@ -113,7 +115,14 @@ export default function EditPost() {
         </Row>
 
         <Form.Check type="checkbox" label="Include Date" name="include_date" checked={formData.include_date} onChange={handleChange} />
-        {formData.include_date && <Form.Control type="date" name="date" value={formData.date} onChange={handleChange} className="mb-3" />}
+        {formData.include_date && (
+          <ReactDatePicker
+            selected={formData.date ? new Date(formData.date) : null}
+            onChange={(date) => setFormData(prev => ({ ...prev, date }))}
+            dateFormat="yyyy-MM-dd"
+            className="form-control mb-3"
+          />
+        )}
 
         <Form.Check type="checkbox" label="Include Time" name="include_time" checked={formData.include_time} onChange={handleChange} />
         {formData.include_time && <Form.Control type="time" name="time" value={formData.time} onChange={handleChange} className="mb-3" />}

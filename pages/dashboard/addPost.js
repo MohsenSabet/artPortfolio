@@ -5,10 +5,12 @@ import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabaseClient';
 import 'react-quill-new/dist/quill.snow.css';
 import ReactQuill from 'react-quill-new';
+import ReactDatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 export default function AddPost() {
   const router = useRouter();
-  const [formData, setFormData] = useState({ media: null, title: '', category: 'Painting', description: '', privacy: 'Public', includeDate: false, date: '', includeTime: false, time: '', featured: false });
+  const [formData, setFormData] = useState({ media: null, title: '', category: 'Painting', description: '', privacy: 'Public', includeDate: false, date: null, includeTime: false, time: '', featured: false });
   const [previewUrl, setPreviewUrl] = useState(null);
   const [errors, setErrors] = useState({});
   const [status, setStatus] = useState({ loading: false, error: null, success: false, message: '' });
@@ -26,7 +28,7 @@ export default function AddPost() {
 
   const removeMedia = () => { setFormData(prev => ({ ...prev, media: null })); setPreviewUrl(null); };
 
-  const handleClear = () => { setFormData({ media: null, title: '', category: 'Painting', description: '', privacy: 'Public', includeDate: false, date: '', includeTime: false, time: '', featured: false }); setPreviewUrl(null); setErrors({}); setStatus({ loading: false, error: null, success: false, message: '' }); };
+  const handleClear = () => { setFormData({ media: null, title: '', category: 'Painting', description: '', privacy: 'Public', includeDate: false, date: null, includeTime: false, time: '', featured: false }); setPreviewUrl(null); setErrors({}); setStatus({ loading: false, error: null, success: false, message: '' }); };
   const handleCancel = () => router.push('/dashboard');
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -90,7 +92,7 @@ export default function AddPost() {
       // confirmation
       setStatus({ loading: false, error: null, success: true, message: 'Post added successfully!' });
       // clear form
-      setFormData({ media: null, title: '', category: 'Painting', description: '', privacy: 'Public', includeDate: false, date: '', includeTime: false, time: '', featured: false });
+      setFormData({ media: null, title: '', category: 'Painting', description: '', privacy: 'Public', includeDate: false, date: null, includeTime: false, time: '', featured: false });
       setPreviewUrl(null);
     }
   };
@@ -169,7 +171,14 @@ export default function AddPost() {
             </Form.Select>
           </Form.Group>
           <Form.Check className="ms-4 text-dark mb-2" type="checkbox" label="Include Date" name="includeDate" checked={formData.includeDate} onChange={handleChange} />
-          {formData.includeDate && <Form.Control type="date" name="date" value={formData.date} onChange={handleChange} size="sm" className="ms-2 mb-2" />}
+          {formData.includeDate && (
+            <ReactDatePicker
+              selected={formData.date}
+              onChange={(date) => setFormData(prev => ({ ...prev, date }))}
+              dateFormat="yyyy-MM-dd"
+              className="form-control form-control-sm ms-2 mb-2"
+            />
+          )}
           {formData.includeTime && <Form.Control type="time" name="time" value={formData.time} onChange={handleChange} size="sm" className="ms-2 mb-2" />}
           <Form.Check className="ms-4 text-dark mb-2" type="checkbox" label="Featured" name="featured" checked={formData.featured} onChange={handleChange} />
         </div>
