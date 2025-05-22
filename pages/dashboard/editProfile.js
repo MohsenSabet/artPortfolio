@@ -1,51 +1,99 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { Container, Card, Form, Button, Row, Col } from 'react-bootstrap';
+import { supabase } from '@/lib/supabaseClient';
+import { Container, Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import { FaEnvelope, FaPhone, FaTwitter, FaLinkedin, FaInstagram } from 'react-icons/fa';
 
 export default function EditProfile() {
-  // initial static data
-  const initial = {
-    firstName: 'Admin',
-    lastName: 'User',
-    username: 'adminuser',
-    email: 'admin@example.com',
-    phone: '123-456-7890',
-    bio: 'Passionate admin with a love for art and design.',
-    profilePic: 'https://via.placeholder.com/200',
-    social: {
-      twitter: 'https://twitter.com/admin',
-      linkedIn: 'https://linkedin.com/in/admin',
-      instagram: 'https://instagram.com/admin',
-    },
-    mediums: ['Painting', 'Digital', 'Sculpture'],
-    pronouns: 'they/them',
-  };
-
-  const [profilePic, setProfilePic] = useState(initial.profilePic);
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [profilePic, setProfilePic] = useState('');
   const [profileFile, setProfileFile] = useState(null);
-  const [firstName, setFirstName] = useState(initial.firstName);
-  const [lastName, setLastName] = useState(initial.lastName);
-  const [username, setUsername] = useState(initial.username);
-  const [pronouns, setPronouns] = useState(initial.pronouns);
-  const [email, setEmail] = useState(initial.email);
-  const [phone, setPhone] = useState(initial.phone);
-  const [bio, setBio] = useState(initial.bio);
-  const [twitter, setTwitter] = useState(initial.social.twitter);
-  const [linkedIn, setLinkedIn] = useState(initial.social.linkedIn);
-  const [instagram, setInstagram] = useState(initial.social.instagram);
-  const [mediums, setMediums] = useState(initial.mediums);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [username, setUsername] = useState('');
+  const [pronouns, setPronouns] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [bio, setBio] = useState('');
+  const [twitter, setTwitter] = useState('');
+  const [linkedIn, setLinkedIn] = useState('');
+  const [instagram, setInstagram] = useState('');
+  const [mediums, setMediums] = useState([]);
   const [newMedium, setNewMedium] = useState('');
+  const [userId, setUserId] = useState(null);
 
-  // toggle medium selection
-  const toggleMedium = (item) => {
-    setMediums((prev) =>
-      prev.includes(item) ? prev.filter((m) => m !== item) : [...prev, item]
-    );
+  // Fetch profile on mount
+  useEffect(() => {
+    async function loadProfile() {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return router.push('/login');
+      setUserId(session.user.id);
+      const userId = session.user.id;
+      const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
+      if (error) {
+        setError(error.message);
+      } else {
+        setFirstName(data.first_name || '');
+        setLastName(data.last_name || '');
+        setUsername(data.username || '');
+        setPronouns(data.pronouns || '');
+        setEmail(data.email || '');
+        setPhone(data.phone || '');
+        setBio(data.bio || '');
+        setProfilePic(data.avatar_url || 'https://via.placeholder.com/200');
+        setTwitter(data.twitter || '');
+        setLinkedIn(data.linkedin || '');
+        setInstagram(data.instagram || '');
+        setMediums(data.mediums ? data.mediums.split(',') : []);
+      }
+      setLoading(false);
+    }
+    loadProfile();
+  }, [router]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
+    // Optionally upload profileFile to storage and get URL...
+    const updates = {
+      first_name: firstName,
+      last_name: lastName,
+      username,
+      pronouns,
+      email,
+      phone,
+      avatar_url: profilePic,
+      bio,
+      twitter,
+      linkedin: linkedIn,
+      instagram,
+      mediums: mediums.join(',')
+    };
+    const { data: updated, error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', userId)
+      .select()
+      .single();
+    if (error) {
+      setError(error.message);
+    } else {
+      // redirect to profile to view changes
+      router.push('/dashboard/profile');
+    }
   };
+
+  if (loading) return <p>Loading...</p>;
 
   return (
     <Container className="mt-5">
+      {error && <Alert variant="danger">{error}</Alert>}
+      {success && <Alert variant="success">Profile updated!</Alert>}
       <Card style={{ maxWidth: '600px', margin: '0 auto', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
         <Card.Header as="h4" className="d-flex justify-content-between align-items-center">
           Edit Profile
@@ -54,7 +102,7 @@ export default function EditProfile() {
           </Link>
         </Card.Header>
         <Card.Body>
-          <Form>
+          <Form onSubmit={handleSubmit}>
             <Form.Group controlId="profilePic" className="mb-3 text-center">
               <Form.Label>Profile Picture</Form.Label>
               <div className="mb-2">
@@ -197,7 +245,7 @@ export default function EditProfile() {
             </Form.Group>
 
             <div className="d-flex justify-content-end">
-              <Button variant="success">Save Changes</Button>
+              <Button variant="success" type="submit">Save Changes</Button>
             </div>
           </Form>
         </Card.Body>
