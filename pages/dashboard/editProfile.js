@@ -59,7 +59,34 @@ export default function EditProfile() {
     e.preventDefault();
     setError(null);
     setSuccess(false);
-    // Optionally upload profileFile to storage and get URL...
+
+    // If a new profile image was selected, upload it to storage and get its public URL
+    let avatar_url = profilePic;
+    if (profileFile) {
+      const fileExt = profileFile.name.split('.').pop();
+      const filePath = `${userId}/${Date.now()}.${fileExt}`;
+      const { error: storageError } = await supabase
+        .storage
+        .from('avatars')
+        .upload(filePath, profileFile, { upsert: true });
+      if (storageError) {
+        // Inform user if bucket is missing
+        if (storageError.message.toLowerCase().includes('bucket not found')) {
+          setError("Storage bucket 'avatars' not found. Please create it in your Supabase dashboard under Storage > Buckets.");
+        } else {
+          setError(storageError.message);
+        }
+        return;
+      }
+      const { data: { publicUrl } } = supabase
+        .storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+      avatar_url = publicUrl;
+      setProfilePic(publicUrl);
+    }
+
+    // Build updates with storage URL instead of blob
     const updates = {
       first_name: firstName,
       last_name: lastName,
@@ -67,7 +94,7 @@ export default function EditProfile() {
       pronouns,
       email,
       phone,
-      avatar_url: profilePic,
+      avatar_url,
       bio,
       twitter,
       linkedin: linkedIn,
