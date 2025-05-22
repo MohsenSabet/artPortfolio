@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import { FaArrowLeft, FaImage, FaPaperclip } from 'react-icons/fa';
 import { useRouter } from 'next/router';
+import { supabase } from '@/lib/supabaseClient';
 import 'react-quill-new/dist/quill.snow.css';
 import ReactQuill from 'react-quill-new';
 
@@ -10,7 +11,7 @@ export default function AddPost() {
   const [formData, setFormData] = useState({ media: null, title: '', category: 'Painting', description: '', privacy: 'Public', includeDate: false, date: '', includeTime: false, time: '', featured: false });
   const [previewUrl, setPreviewUrl] = useState(null);
   const [errors, setErrors] = useState({});
-  const [status, setStatus] = useState({ loading: false, success: null, message: '' });
+  const [status, setStatus] = useState({ loading: false, error: null, success: false, message: '' });
 
   const handleChange = (e) => {
     const { name, files, value, type, checked } = e.target;
@@ -25,21 +26,73 @@ export default function AddPost() {
 
   const removeMedia = () => { setFormData(prev => ({ ...prev, media: null })); setPreviewUrl(null); };
 
-  const handleClear = () => { setFormData({ media: null, title: '', category: 'Painting', description: '', privacy: 'Public', includeDate: false, date: '', includeTime: false, time: '', featured: false }); setPreviewUrl(null); setErrors({}); setStatus({ loading: false, success: null, message: '' }); };
+  const handleClear = () => { setFormData({ media: null, title: '', category: 'Painting', description: '', privacy: 'Public', includeDate: false, date: '', includeTime: false, time: '', featured: false }); setPreviewUrl(null); setErrors({}); setStatus({ loading: false, error: null, success: false, message: '' }); };
   const handleCancel = () => router.push('/dashboard');
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
     if (!formData.media) newErrors.media = 'Please upload an image or video.';
     if (!formData.description) newErrors.description = 'Description is required.';
     if (Object.keys(newErrors).length) return setErrors(newErrors);
-    setErrors({}); setStatus({ loading: true, success: null, message: '' });
-    // TODO: replace with actual upload logic
-    setTimeout(() => {
-      setStatus({ loading: false, success: true, message: 'Post submitted successfully!' });
+    setErrors({});
+    setStatus({ loading: true, error: null, success: false, message: '' });
+    // Upload media file to Supabase Storage bucket 'posts'
+    const { data: { session } } = await supabase.auth.getSession();
+    console.log('Supabase session:', session);
+    console.log('Session user ID:', session?.user?.id);
+    console.log('Session access token:', session?.access_token);
+    if (!session) {
+      setStatus({ loading: false, error: 'Not authenticated', success: false, message: '' });
+      return;
+    }
+    // Ensure profile exists to satisfy posts.author_id foreign key
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({ id: session.user.id, email: session.user.email });
+    if (profileError) {
+      setStatus({ loading: false, error: profileError.message, success: false, message: '' });
+      return;
+    }
+    let mediaUrl;
+    if (formData.media instanceof File) {
+      const fileExt = formData.media.name.split('.').pop();
+      const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage.from('posts').upload(fileName, formData.media);
+      if (uploadError) {
+        setStatus({ loading: false, error: uploadError.message, success: false, message: '' });
+        return;
+      }
+      const { data } = supabase.storage.from('posts').getPublicUrl(fileName);
+      mediaUrl = data.publicUrl;
+    } else {
+      mediaUrl = formData.media;
+    }
+    // Insert post record
+    const postObj = {
+      author_id: session.user.id,
+      title: formData.title,
+      media_url: mediaUrl,
+      category: formData.category,
+      privacy: formData.privacy,
+      include_date: formData.includeDate,
+      date: formData.includeDate ? formData.date : null,
+      include_time: formData.includeTime,
+      time: formData.includeTime ? formData.time : null,
+      featured: formData.featured,
+      description: formData.description
+    };
+    console.log('Inserting post object:', postObj);
+    const { data: insertData, error: insertError } = await supabase.from('posts').insert(postObj);
+    console.log('Insert response data:', insertData, 'error:', insertError);
+    if (insertError) {
+      setStatus({ loading: false, error: insertError.message, success: false, message: '' });
+    } else {
+      // confirmation
+      setStatus({ loading: false, error: null, success: true, message: 'Post added successfully!' });
+      // clear form
       setFormData({ media: null, title: '', category: 'Painting', description: '', privacy: 'Public', includeDate: false, date: '', includeTime: false, time: '', featured: false });
       setPreviewUrl(null);
-    }, 1000);
+    }
   };
 
   // Quill configuration: enable fonts, sizes, formatting, and keyboard, no file attachments
@@ -60,6 +113,8 @@ export default function AddPost() {
 
   return (
     <div className="border rounded shadow-md bg-light">
+      {status.error && <Alert variant="danger" className="m-3">{status.error}</Alert>}
+      {status.success && <Alert variant="success" className="m-3">{status.message}</Alert>}
       {/* Header */}
       <div className="d-flex align-items-center p-3 border-bottom">
         <FaArrowLeft className="me-3 cursor-pointer text-dark" size={20} onClick={handleCancel} />
@@ -141,7 +196,7 @@ export default function AddPost() {
       {/* Footer */}
       <div className="d-flex justify-content-end p-3 border-top bg-light">
         <Button variant="outline-secondary" onClick={handleClear} className="me-2">Clear</Button>
-        <Button variant="primary" onClick={handleSubmit}>Publish</Button>
+        <Button variant="primary" onClick={handleSubmit} disabled={status.loading}>{status.loading ? 'Publishing...' : 'Publish'}</Button>
       </div>
     </div>
   );
