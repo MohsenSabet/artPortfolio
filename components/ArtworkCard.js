@@ -3,19 +3,42 @@ import { Card, Badge } from 'react-bootstrap';
 import Link from 'next/link';
 
 export default function ArtworkCard({ post }) {
-  const { id, title, media, category, privacy, includeDate, date, includeTime, time, featured, author } = post;
-  const dateDisplay = includeDate && date ? new Date(date).toLocaleDateString() : null;
-  const timeDisplay = includeTime && time ? time : null;
+  const {
+    id,
+    title,
+    media_url,
+    category,
+    privacy,
+    include_date,
+    date,
+    include_time,
+    time,
+    featured,
+    profiles: author
+  } = post;
+  const dateDisplay = include_date && date ? new Date(date).toLocaleDateString() : null;
+  const timeDisplay = include_time && time ? time : null;
+  // Determine if media is a video
+  const isVideo = media_url && /\.(mp4|webm|ogg|mov)$/i.test(media_url);
 
   return (
     <Card className="h-100">
       <Link href={`/artworks/${id}`}>
-        <Card.Img
-          variant="top"
-          src={media}
-          alt={title}
-          style={{ height: '180px', objectFit: 'cover' }}
-        />
+        {isVideo ? (
+          <video
+            controls
+            src={media_url}
+            style={{ height: '180px', objectFit: 'cover', width: '100%' }}
+          />
+        ) : (
+          <Card.Img
+            variant="top"
+            src={media_url}
+            alt={title}
+            onError={(e) => { e.currentTarget.src = '/file.svg'; }}
+            style={{ height: '180px', objectFit: 'cover' }}
+          />
+        )}
       </Link>
       <Card.Body>
         <div className="d-flex justify-content-between align-items-start mb-2">
@@ -31,14 +54,14 @@ export default function ArtworkCard({ post }) {
       </Card.Body>
       <Card.Footer className="bg-white border-0 d-flex align-items-center">
         <img
-          src={author?.avatar || '/window.svg'}
-          alt={author?.name}
+          src={author?.avatar_url || '/window.svg'}
+          alt={`${author?.first_name || ''} ${author?.last_name || ''}`}
           width={32}
           height={32}
           className="rounded-circle me-2"
         />
         <div>
-          <div className="fw-bold">{author?.name}</div>
+          <div className="fw-bold">{author?.username || `${author?.first_name || ''} ${author?.last_name || ''}`}</div>
           {(dateDisplay || timeDisplay) && (
             <div className="text-muted small">
               {dateDisplay} {timeDisplay}

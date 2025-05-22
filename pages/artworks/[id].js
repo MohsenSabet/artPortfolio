@@ -1,14 +1,18 @@
 import React from 'react';
-import { posts } from '@/lib/userData';
+import { supabase } from '@/lib/supabaseClient';
 import ArtworkCardDetail from '@/components/ArtworkCardDetail';
 
-export async function getStaticPaths() {
-  const paths = posts.map((post) => ({ params: { id: post.id } }));
-  return { paths, fallback: false };
-}
-
-export async function getStaticProps({ params }) {
-  const post = posts.find((p) => p.id === params.id);
+export async function getServerSideProps({ params }) {
+  // Fetch single post with author profile
+  const { data: post, error } = await supabase
+    .from('posts')
+    .select(`*, profiles(first_name,last_name,avatar_url,username,pronouns)`)
+    .eq('id', params.id)
+    .single();
+  if (error) {
+    console.error('Error fetching post:', error.message);
+    return { notFound: true };
+  }
   return { props: { post } };
 }
 
