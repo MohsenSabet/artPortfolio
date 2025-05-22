@@ -17,7 +17,12 @@ export default function ArtworkCardDetail({ post }) {
     profiles: author,
     description
   } = post;
-  const dateDisplay = include_date && date ? new Date(date).toLocaleDateString() : null;
+  const dateDisplay = include_date && date
+    ? (() => {
+        const dt = new Date(date);
+        return `${dt.getMonth() + 1}/${dt.getDate()}/${dt.getFullYear()}`;
+      })()
+    : null;
   const timeDisplay = include_time && time ? time : null;
   const isVideo = media_url && /\.(mp4|webm|ogg|mov)$/i.test(media_url);
 

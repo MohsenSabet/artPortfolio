@@ -2,6 +2,7 @@
 .detailCard {
   display: flex;              /* use flexbox for layout */
   flex-direction: column;     /* stack children vertically */
+  align-items: flex-start;   /* items start at top, preventing stretch */
   width: 100%;                /* full width of the container */
   max-width: 900px;           /* limit max width for larger screens */
   margin: 0 auto;            /* center the card */
@@ -66,14 +67,15 @@
 /* Responsive layout for larger screens */
 @media (min-width: 768px) {
   .detailCard {
-    flex-direction: row;      /* side by side on larger screens */
+    flex-direction: column;    /* always stack media on top */
   }
   .media, .info {
-    width: 50%;              /* equal width for media and info */
+    width: 100%;              /* full width */
   }
   .media img,
   .media video {
-    height: 100%;            /* media covers full height */
+    width: 100%;
+    height: auto; /* maintain original aspect ratio */
     object-fit: cover;       /* cover area without distortion */
   }
 }
