@@ -1,9 +1,9 @@
 -- Profiles table extending Supabase auth.users
 CREATE TABLE IF NOT EXISTS profiles (
   id uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  first_name text NOT NULL,
-  last_name text NOT NULL,
-  username text UNIQUE NOT NULL,
+  first_name text,
+  last_name text,
+  username text UNIQUE,
   pronouns text,
   email text UNIQUE NOT NULL,
   phone text,

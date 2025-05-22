@@ -1,27 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Container, Card, ListGroup, Button, Image, Row, Col, Badge } from 'react-bootstrap';
 import { FaTwitter, FaLinkedin, FaInstagram, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { supabase } from '@/lib/supabaseClient';
+import { useRouter } from 'next/router';
 
 export default function AdminProfile() {
-  // Static admin data
-  const user = {
-    firstName: 'Admin',
-    lastName: 'User',
-    username: 'adminuser',
-    email: 'admin@example.com',
-    role: 'Administrator',
-    phone: '123-456-7890',
-    joined: 'January 1, 2020',
-    pronouns: 'they/them',
-    profilePic: 'https://via.placeholder.com/200',
-    social: {
-      twitter: 'https://twitter.com/admin',
-      linkedIn: 'https://linkedin.com/in/admin',
-      instagram: 'https://instagram.com/admin',
-    },
-    bio: 'Passionate admin with a love for art and design. Enjoys curating beautiful portfolios and engaging with the community.',
-    mediums: ['Painting', 'Digital', 'Sculpture'],
-  };
+  const router = useRouter();
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return router.push('/login');
+      const userId = session.user.id;
+      // Ensure profile row exists (insert with email if missing)
+      const { data, error } = await supabase
+        .from('profiles')
+        .upsert({ id: userId, email: session.user.email }, { onConflict: 'id' })
+        .select('*')
+        .single();
+      if (!error) setProfile(data);
+      setLoading(false);
+    };
+    loadProfile();
+  }, [router]);
+
+  if (loading) return <p>Loading...</p>;
+  if (!profile) return <p>No profile found.</p>;
 
   return (
     <Container className="mt-5">
@@ -29,11 +35,11 @@ export default function AdminProfile() {
         <Col md={4}>
           <Card className="text-center h-100" style={{ boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
             <Card.Body>
-              <Image src={user.profilePic} roundedCircle fluid style={{ width: '150px', height: '150px', objectFit: 'cover' }} className="mb-3" />
-              <Card.Title style={{ fontSize: '1.5rem' }}>{user.firstName} {user.lastName}</Card.Title>
-              <div className="mb-1 text-muted">@{user.username}</div>
-              <div className="mb-2 text-muted"><small>{user.pronouns}</small></div>
-              <Badge bg="secondary" className="mb-2">{user.role}</Badge>
+              <Image src={profile.avatar_url} roundedCircle fluid style={{ width: '150px', height: '150px', objectFit: 'cover' }} className="mb-3" />
+              <Card.Title style={{ fontSize: '1.5rem' }}>{profile.first_name} {profile.last_name}</Card.Title>
+              <div className="mb-1 text-muted">@{profile.username}</div>
+              <div className="mb-2 text-muted"><small>{profile.pronouns}</small></div>
+              <Badge bg="secondary" className="mb-2">{profile.role}</Badge>
             </Card.Body>
           </Card>
         </Col>
@@ -42,30 +48,30 @@ export default function AdminProfile() {
             <Card.Body>
               <Row className="justify-content-center mb-3 gx-2">
                 <Col xs="auto">
-                  <Button variant="outline-secondary" size="sm" href={`mailto:${user.email}`}><FaEnvelope /></Button>
+                  <Button variant="outline-secondary" size="sm" href={`mailto:${profile.email}`}><FaEnvelope /></Button>
                 </Col>
                 <Col xs="auto">
-                  <Button variant="outline-secondary" size="sm" href={`tel:${user.phone}`}><FaPhone /></Button>
+                  <Button variant="outline-secondary" size="sm" href={`tel:${profile.phone}`}><FaPhone /></Button>
                 </Col>
                 <Col xs="auto">
-                  <Button variant="outline-primary" size="sm" href={user.social.twitter} target="_blank"><FaTwitter /></Button>
+                  <Button variant="outline-primary" size="sm" href={profile.social_links.twitter} target="_blank"><FaTwitter /></Button>
                 </Col>
                 <Col xs="auto">
-                  <Button variant="outline-info" size="sm" href={user.social.linkedIn} target="_blank"><FaLinkedin /></Button>
+                  <Button variant="outline-info" size="sm" href={profile.social_links.linkedIn} target="_blank"><FaLinkedin /></Button>
                 </Col>
                 <Col xs="auto">
-                  <Button variant="outline-danger" size="sm" href={user.social.instagram} target="_blank"><FaInstagram /></Button>
+                  <Button variant="outline-danger" size="sm" href={profile.social_links.instagram} target="_blank"><FaInstagram /></Button>
                 </Col>
               </Row>
               <hr />
               <div className="mb-4">
                 <h5>Biography</h5>
-                <Card.Text>{user.bio}</Card.Text>
+                <Card.Text>{profile.bio}</Card.Text>
               </div>
               <div>
                 <h5>Mediums</h5>
                 <div>
-                  {user.mediums.map((m) => (
+                  {profile.mediums.map((m) => (
                     <Badge key={m} bg="light" text="dark" className="me-2 mb-1">{m}</Badge>
                   ))}
                 </div>
