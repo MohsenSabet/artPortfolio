@@ -1,8 +1,25 @@
 // components/MainNav.js
 import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
 import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
+import { useRouter } from 'next/router';
 
 export default function MainNav() {
+  const [session, setSession] = useState(null);
+  const router = useRouter();
+  useEffect(() => {
+    // get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => setSession(session));
+    // listen for auth changes
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => setSession(session));
+    return () => listener.subscription.unsubscribe();
+  }, []);
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/login');
+  };
+
   return (
     <Navbar bg="light" expand="lg">
       <Container>
@@ -24,8 +41,11 @@ export default function MainNav() {
             </NavDropdown>
           </Nav>
           <Nav className="ms-auto">
-            <Nav.Link as={Link} href="/login">Login</Nav.Link>
-            <Nav.Link as={Link} href="/signup">Sign Up</Nav.Link>
+            {session ? (
+              <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+            ) : (
+              <Nav.Link as={Link} href="/login">Login</Nav.Link>
+            )}
           </Nav>
         </Navbar.Collapse>
       </Container>
