@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@400;700&display=swap');
+
 .neonNav {
   background-color: #1a1a1a;
   position: sticky;
@@ -21,7 +23,8 @@
   overflow: hidden;
   color: #ffffff !important;
   text-shadow: none;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, transform 0.2s ease;
+  transform: scale(1);
 }
 
 /* Gradient underline */
@@ -51,6 +54,12 @@
   left: 0;
 }
 
+/* Hover effects: zoom text */
+.neonNav :global(.navbar-brand):hover,
+.neonNav :global(.nav-link):hover {
+  transform: scale(1.1);
+}
+
 /* Dropdown menu styling scoped under neonNav */
 .neonNav :global(.dropdown-menu) {
   background-color: rgba(26, 26, 26, 0.9);
@@ -64,4 +73,14 @@
 .neonNav :global(.dropdown-item:hover) {
   background-color: #39ff14 !important;
   color: #1a1a1a !important;
+}
+
+/* Artistic font for brand */
+.neonNav :global(.navbar-brand) {
+  font-family: 'Great Vibes', cursive;
+}
+
+/* Elegant serif for links */
+.neonNav :global(.nav-link) {
+  font-family: 'Playfair Display', serif;
 }
