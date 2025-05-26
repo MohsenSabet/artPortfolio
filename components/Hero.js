@@ -2,6 +2,10 @@ import React from 'react';
 import { Carousel, Button } from 'react-bootstrap';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+
+// dynamically import ThreeBackground to disable SSR
+const ThreeBackground = dynamic(() => import('./ThreeBackground'), { ssr: false });
 
 export default function Hero() {
   const slides = [
@@ -26,8 +30,9 @@ export default function Hero() {
   ];
 
   return (
-    <div className="position-relative overflow-hidden" style={{ height: '100vh' }}>
-      <Carousel fade controls indicators interval={5000} className="h-100">
+    <div className="position-relative" style={{ height: '100vh' }}>
+      <ThreeBackground />
+      <Carousel fade controls indicators interval={5000} className="h-100" style={{ position: 'relative', zIndex: 2 }}>
         {slides.map((slide, idx) => (
           <Carousel.Item key={idx} className="h-100 position-relative">
             {/* Background image */}
