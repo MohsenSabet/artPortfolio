@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/router';
 import { FaTwitter, FaLinkedin, FaInstagram } from 'react-icons/fa';
+import styles from '@/styles/SocialMediaHover.module.css';
 
 // client-only 3D background
 const ThreeBackground = dynamic(() => import('@/components/ThreeBackground'), { ssr: false });
@@ -108,18 +109,18 @@ export default function Home() {
           }}
         >
           {profile.twitter && (
-            <a href={profile.twitter} target="_blank" rel="noopener noreferrer">
-              <FaTwitter size={30} color="#fafafa" />
+            <a href={profile.twitter} target="_blank" rel="noopener noreferrer" className={styles.socialMediaIcon}>
+              <FaTwitter size={30} />
             </a>
           )}
           {profile.linkedin && (
-            <a href={profile.linkedin} target="_blank" rel="noopener noreferrer">
-              <FaLinkedin size={30} color="#fafafa" />
+            <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" className={styles.socialMediaIcon}>
+              <FaLinkedin size={30} />
             </a>
           )}
           {profile.instagram && (
-            <a href={profile.instagram} target="_blank" rel="noopener noreferrer">
-              <FaInstagram size={30} color="#fafafa" />
+            <a href={profile.instagram} target="_blank" rel="noopener noreferrer" className={styles.socialMediaIcon}>
+              <FaInstagram size={30} />
             </a>
           )}
         </motion.div>
@@ -148,12 +149,26 @@ export default function Home() {
           opacity: buttonOpacity, y: buttonY, zIndex: 2
         }}
       >
-        <button
+        <motion.a
           onClick={() => (window.location.href = '/artworks')}
-          style={{ padding: '1rem 2rem', fontSize: '1rem', cursor: 'pointer', borderRadius: '8px' }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 1 }}
+          whileHover={{ scale: 1.05, textShadow: '0 0 12px rgba(250,250,250,0.8)' }}
+          whileTap={{ scale: 0.95 }}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            color: '#fafafa',
+            fontSize: '2rem',
+            cursor: 'pointer',
+            textDecoration: 'none',
+            letterSpacing: '1px'
+          }}
         >
           View My Artworks
-        </button>
+        </motion.a>
       </motion.div>
     </div>
   );
