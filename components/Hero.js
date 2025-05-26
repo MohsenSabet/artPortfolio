@@ -1,6 +1,6 @@
 import React from 'react';
 import { Carousel, Button } from 'react-bootstrap';
-import { motion } from 'framer-motion';
+import { motion, useViewportScroll, useTransform } from 'framer-motion';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 
@@ -8,6 +8,11 @@ import dynamic from 'next/dynamic';
 const ThreeBackground = dynamic(() => import('./ThreeBackground'), { ssr: false });
 
 export default function Hero() {
+  // scroll-based animation for welcome text
+  const { scrollY } = useViewportScroll();
+  const welcomeOpacity = useTransform(scrollY, [0, 300], [1, 0]);
+  const welcomeY = useTransform(scrollY, [0, 300], [0, -50]);
+
   const slides = [
     {
       img: '/vercel.svg',
@@ -31,6 +36,23 @@ export default function Hero() {
 
   return (
     <div className="position-relative" style={{ height: '100vh' }}>
+      {/* Welcome overlay */}
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, ease: "easeOut" }} style={{
+        position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+        display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 4,
+        opacity: welcomeOpacity, y: welcomeY
+      }}>
+        <motion.h1
+          initial={{ opacity: 0, y: 60, scale: 0.85 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ delay: 0.2, duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
+          style={{
+            fontFamily: 'Great Vibes, cursive', fontSize: '4rem', color: '#fafafa',
+            textAlign: 'center', padding: '0 1rem'
+          }}>
+          Welcome to My Portfolio
+        </motion.h1>
+      </motion.div>
       <ThreeBackground />
       <Carousel fade controls indicators interval={5000} className="h-100" style={{ position: 'relative', zIndex: 2 }}>
         {slides.map((slide, idx) => (
