@@ -12,10 +12,12 @@
     "@heroui/react": "^2.7.8",
     "@react-three/drei": "^10.0.8",
     "@react-three/fiber": "^9.1.2",
+    "@react-three/postprocessing": "^3.0.4",
     "bootstrap": "^5.3.6",
     "framer-motion": "^12.12.1",
     "next": "15.3.2",
     "next-auth": "^4.24.11",
+    "postprocessing": "^6.37.3",
     "react": "^19.0.0",
     "react-bootstrap": "^2.10.10",
     "react-datepicker": "^8.3.0",
@@ -26,6 +28,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "babel-plugin-glsl": "^1.0.0",
     "eslint": "^9",
     "eslint-config-next": "15.3.2"
   }
