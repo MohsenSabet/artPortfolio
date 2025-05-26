@@ -4,6 +4,7 @@ import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/router';
+import styles from './MainNav.module.css';
 
 export default function MainNav() {
   const [session, setSession] = useState(null);
@@ -21,7 +22,11 @@ export default function MainNav() {
   };
 
   return (
-    <Navbar bg="light" expand="lg">
+    <Navbar
+      className={`${styles.neonNav} ${router.pathname === '/' ? styles.transparent : ''}`}
+      expand="lg"
+      variant="dark"
+    >
       <Container>
         <Navbar.Brand as={Link} href="/">Art Portfolio</Navbar.Brand>
         <Navbar.Toggle aria-controls="main-navbar-nav" />

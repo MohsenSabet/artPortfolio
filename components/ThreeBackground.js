@@ -31,7 +31,7 @@ function TwinklingStars() {
 export default function ThreeBackground() {
   return (
     <Canvas
-      style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+      style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: -1 }}
       camera={{ position: [0, 0, 5], fov: 75 }}
     >
       {/* soft pastel background and fog */}
