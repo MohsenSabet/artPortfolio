@@ -14,27 +14,54 @@
   border: none !important;
 }
 
-.navbar-brand, .nav-link {
-  color: #39ff14 !important;
-  text-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14;
-}
-
-.navbar-brand:hover, .nav-link:hover {
+/* Target Bootstrap brand and links within neonNav */
+.neonNav :global(.navbar-brand),
+.neonNav :global(.nav-link) {
+  position: relative;
+  overflow: hidden;
   color: #ffffff !important;
-  text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff;
+  text-shadow: none;
+  transition: color 0.3s ease;
 }
 
-/* Dropdown menu styling */
-.dropdown-menu {
+/* Gradient underline */
+.neonNav :global(.navbar-brand)::after,
+.neonNav :global(.nav-link)::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(120deg, #ff9ce6, #6ec1ff, #39ff14);
+  bottom: 0;
+  left: -100%;
+  transition: left 0.5s ease;
+}
+
+/* Hover effects: remove glow */
+.neonNav:hover :global(.navbar-brand),
+.neonNav:hover :global(.nav-link),
+.neonNav :global(.navbar-brand):hover,
+.neonNav :global(.nav-link):hover {
+  color: #ffffff !important;
+  text-shadow: none;
+}
+
+.neonNav :global(.navbar-brand):hover::after,
+.neonNav :global(.nav-link):hover::after {
+  left: 0;
+}
+
+/* Dropdown menu styling scoped under neonNav */
+.neonNav :global(.dropdown-menu) {
   background-color: rgba(26, 26, 26, 0.9);
   border: 1px solid #39ff14;
 }
 
-.dropdown-item {
+.neonNav :global(.dropdown-item) {
   color: #39ff14 !important;
 }
 
-.dropdown-item:hover {
+.neonNav :global(.dropdown-item:hover) {
   background-color: #39ff14 !important;
   color: #1a1a1a !important;
 }
