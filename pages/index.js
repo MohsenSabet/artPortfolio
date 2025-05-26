@@ -74,10 +74,12 @@ export default function Home() {
         }}
       >
         <motion.h1
-          initial={{ opacity: 0, y: 20, scale: 0.9 }}
+          initial={{ opacity: 0, y: 60, scale: 0.85 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ duration: 0.8 }}
-          style={{ fontSize: '3rem', color: '#fafafa' }}
+          transition={{ delay: 0.2, duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
+          style={{
+            fontFamily: 'Great Vibes, cursive', fontSize: '4rem', color: '#fafafa',
+            textAlign: 'center', padding: '0 1rem'}}
         >
           Welcome to My Portfolio
         </motion.h1>
@@ -92,32 +94,32 @@ export default function Home() {
         }}
       >
         <img
-          src={profile.avatar_url || '/profile.jpg'}
+          src={profile.avatar_url}
           alt="Profile"
           style={{
-            width: 250, height: 300, objectFit: 'cover',
-            borderRadius: '20px', boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+            width: 350, height: 400, objectFit: 'cover',
+            borderRadius: '20px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
           }}
         />
         <motion.div
           style={{
-            display: 'flex', gap: '1rem', marginTop: '1rem',
+            display: 'flex', gap: '1rem', marginTop: '2rem',
             opacity: contentOpacity, y: contentY
           }}
         >
           {profile.twitter && (
             <a href={profile.twitter} target="_blank" rel="noopener noreferrer">
-              <FaTwitter size={28} color="#fafafa" />
+              <FaTwitter size={30} color="#fafafa" />
             </a>
           )}
           {profile.linkedin && (
             <a href={profile.linkedin} target="_blank" rel="noopener noreferrer">
-              <FaLinkedin size={28} color="#fafafa" />
+              <FaLinkedin size={30} color="#fafafa" />
             </a>
           )}
           {profile.instagram && (
             <a href={profile.instagram} target="_blank" rel="noopener noreferrer">
-              <FaInstagram size={28} color="#fafafa" />
+              <FaInstagram size={30} color="#fafafa" />
             </a>
           )}
         </motion.div>
@@ -126,7 +128,7 @@ export default function Home() {
       {/* Name & Bio */}
       <motion.div
         style={{
-          position: 'absolute', top: '20%', right: '10%',
+          position: 'absolute', top: '20%', right: '20%',
           opacity: contentOpacity, y: contentY,
           zIndex: 2, maxWidth: '40%'
         }}
