@@ -76,6 +76,14 @@ export default function DashboardHome() {
   // Recent posts (last 3)
   const recentPosts = posts.slice(0, 3);
 
+  // delete a post
+  const handleDelete = async (id) => {
+    if (!confirm('Delete this post?')) return;
+    const { error } = await supabase.from('posts').delete().eq('id', id);
+    if (error) return setError(error.message);
+    setPosts(posts.filter(p => p.id !== id));
+  };
+
   return (
     <Container className="py-4">
       {/* Summary widgets */}
@@ -183,19 +191,18 @@ export default function DashboardHome() {
         </Col>
 
         <Col md={9}>
-          <Card>
+          <Card className={`${styles.glassWidget}`}>  
             <Card.Header className="d-flex justify-content-between align-items-center">
               <h5 className="mb-0">Your Posts</h5>
               <Link href="/dashboard/addPost" passHref>
                 <Button variant="success">+ Add New Post</Button>
               </Link>
             </Card.Header>
-            <Card.Body className="p-0">  
-              
+            <Card.Body className="p-4" style={{ background: 'transparent' }}>
                {displayedPosts.length === 0 ? (
-                <p className="p-4 text-center text-muted">No posts found for this filter.</p>
+                  <p className="text-center text-muted">No posts found for this filter.</p>
                ) : (
-                 <Table hover responsive className="mb-0">
+                 <table className={styles.dashboardTable}>
                    <thead>
                      <tr>
                        <th>Thumbnail</th>
@@ -205,33 +212,28 @@ export default function DashboardHome() {
                      </tr>
                    </thead>
                    <tbody>
-                    {displayedPosts.map((post) => (
+                     {displayedPosts.map(post => (
                        <tr key={post.id}>
-                         <td>
-                           <img
-                             src={post.media_url}
-                             alt={post.title}
-                             style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }}
-                           />
-                         </td>
+                         <td><img src={post.media_url} alt={post.title} style={{ width: '60px', height: '60px', objectFit: 'cover' }} /></td>
                          <td>{post.title}</td>
                          <td>{new Date(post.created_at).toLocaleDateString()}</td>
-                         <td>
-                          <Link href={`/dashboard/editPost?id=${post.id}`} passHref>
-                            <Button size="sm" variant="outline-primary" className="me-2">Edit</Button>
-                          </Link>
-                          <Link href={`/artworks/${post.id}`} passHref>
-                            <Button size="sm" variant="outline-secondary">View</Button>
-                          </Link>
-                        </td>
+                         <td className="actions-cell">
+                           <Link href={`/dashboard/editPost?id=${post.id}`} passHref>
+                             <Button size="sm" variant="outline-primary" className="me-2">Edit</Button>
+                           </Link>
+                           <Link href={`/artworks/${post.id}`} passHref>
+                             <Button size="sm" variant="outline-secondary" className="me-2">View</Button>
+                           </Link>
+                           <Button size="sm" variant="outline-danger" onClick={() => handleDelete(post.id)}>Delete</Button>
+                         </td>
                        </tr>
                      ))}
                    </tbody>
-                 </Table>
+                 </table>
                )}
-            </Card.Body>
-          </Card>
-        </Col>
+             </Card.Body>
+           </Card>
+         </Col>
       </Row>
     </Container>
   );
