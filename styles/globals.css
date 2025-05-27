@@ -1,3 +1,13 @@
+/* Theme classes for explicit light/dark modes */
+html.light {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+html.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

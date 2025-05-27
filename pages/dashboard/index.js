@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
-import { Container, Row, Col, Card, Button, Table, Spinner, Alert, ProgressBar, ListGroup } from 'react-bootstrap';
-import { FaPlus, FaUserEdit, FaTasks } from 'react-icons/fa';
+import { Container, Row, Col, Card, Button, Spinner, Alert, ProgressBar, ListGroup } from 'react-bootstrap';
+import { FaPlus, FaUserEdit, FaTasks, FaClipboardList, FaGlobe, FaLock, FaStar, FaImage, FaCalendarAlt, FaEye, FaEdit, FaTrash } from 'react-icons/fa';
 import styles from '@/styles/Dashboard.module.css';
 
 export default function DashboardHome() {
@@ -94,7 +94,7 @@ export default function DashboardHome() {
             onClick={() => setFilter('all')}
           >
             <Card.Body className="d-flex flex-column justify-content-center">
-              <Card.Title>Total Posts</Card.Title>
+              <Card.Title><FaClipboardList className="me-2" />Total Posts</Card.Title>
               <h2 className="fw-bold text-center">{totalPosts}</h2>
             </Card.Body>
           </Card>
@@ -105,7 +105,7 @@ export default function DashboardHome() {
             onClick={() => setFilter('public')}
           >
             <Card.Body className="d-flex flex-column justify-content-center">
-              <Card.Title>Public Posts</Card.Title>
+              <Card.Title><FaGlobe className="me-2" />Public Posts</Card.Title>
               <h2 className="fw-bold text-center">{publicPosts}</h2>
             </Card.Body>
           </Card>
@@ -116,7 +116,7 @@ export default function DashboardHome() {
             onClick={() => setFilter('private')}
           >
             <Card.Body className="d-flex flex-column justify-content-center">
-              <Card.Title>Private Posts</Card.Title>
+              <Card.Title><FaLock className="me-2" />Private Posts</Card.Title>
               <h2 className="fw-bold text-center">{privatePosts}</h2>
             </Card.Body>
           </Card>
@@ -127,7 +127,7 @@ export default function DashboardHome() {
             onClick={() => setFilter('featured')}
           >
             <Card.Body className="d-flex flex-column justify-content-center">
-              <Card.Title>Featured Posts</Card.Title>
+              <Card.Title><FaStar className="me-2" />Featured Posts</Card.Title>
               <h2 className="fw-bold text-center">{featuredPosts}</h2>
             </Card.Body>
           </Card>
@@ -199,37 +199,37 @@ export default function DashboardHome() {
               </Link>
             </Card.Header>
             <Card.Body className="p-4" style={{ background: 'transparent' }}>
-               {displayedPosts.length === 0 ? (
-                  <p className="text-center text-muted">No posts found for this filter.</p>
-               ) : (
-                 <table className={styles.dashboardTable}>
-                   <thead>
-                     <tr>
-                       <th>Thumbnail</th>
-                       <th>Title</th>
-                       <th>Date Created</th>
-                       <th>Actions</th>
-                     </tr>
-                   </thead>
-                   <tbody>
-                     {displayedPosts.map(post => (
-                       <tr key={post.id}>
-                         <td><img src={post.media_url} alt={post.title} style={{ width: '60px', height: '60px', objectFit: 'cover' }} /></td>
-                         <td>{post.title}</td>
-                         <td>{new Date(post.created_at).toLocaleDateString()}</td>
-                         <td className="actions-cell">
-                           <Link href={`/dashboard/editPost?id=${post.id}`} passHref>
-                             <Button size="sm" variant="outline-primary" className="me-2">Edit</Button>
-                           </Link>
-                           <Link href={`/artworks/${post.id}`} passHref>
-                             <Button size="sm" variant="outline-secondary" className="me-2">View</Button>
-                           </Link>
-                           <Button size="sm" variant="outline-danger" onClick={() => handleDelete(post.id)}>Delete</Button>
-                         </td>
-                       </tr>
-                     ))}
-                   </tbody>
-                 </table>
+              {displayedPosts.length === 0 ? (
+                <p className="text-center text-muted">No posts found for this filter.</p>
+              ) : (
+                <table className={styles.dashboardTable}>
+                  <thead>
+                    <tr>
+                      <th><FaImage className="me-1" />Thumbnail</th>
+                      <th><FaEdit className="me-1" />Title</th>
+                      <th><FaCalendarAlt className="me-1" />Date</th>
+                      <th><FaTasks className="me-1" />Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {displayedPosts.map(post => (
+                      <tr key={post.id}>
+                        <td><img src={post.media_url} alt={post.title} style={{ width: '60px', height: '60px', objectFit: 'cover' }} /></td>
+                        <td>{post.title}</td>
+                        <td>{new Date(post.created_at).toLocaleDateString()}</td>
+                        <td className="actions-cell">
+                          <Link href={`/dashboard/editPost?id=${post.id}`} passHref>
+                            <Button size="sm" variant="outline-primary" className="me-2"><FaEdit /></Button>
+                          </Link>
+                          <Link href={`/artworks/${post.id}`} passHref>
+                            <Button size="sm" variant="outline-secondary" className="me-2"><FaEye /></Button>
+                          </Link>
+                          <Button size="sm" variant="outline-danger" onClick={() => handleDelete(post.id)}><FaTrash /></Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
                )}
              </Card.Body>
            </Card>
