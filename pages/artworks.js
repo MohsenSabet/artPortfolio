@@ -1,7 +1,15 @@
 import React from 'react';
-import { Container, Row, Col, Card } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import styles from '@/styles/Artworks.module.css';
 import { supabase } from '@/lib/supabaseClient';
+
+// client-only tunnel shader background
+const TunnelBackground = dynamic(
+  () => import('@/components/TunnelBackground'),
+  { ssr: false }
+);
 
 export async function getServerSideProps() {
   // Fetch all categories and dedupe
@@ -17,21 +25,20 @@ export async function getServerSideProps() {
 // Dashboard listing mediums
 export default function Artworks({ categories }) {
   return (
-    <Container className="py-4">
-      <h1>Select a Medium</h1>
-      <Row xs={1} sm={2} md={3} lg={4} className="g-4">
-        {categories.map((category) => (
-          <Col key={category}>
-            <Link href={`/artworks/show?medium=${encodeURIComponent(category)}`} passHref>
-              <Card className="h-100 clickable-card">
-                <Card.Body className="d-flex align-items-center justify-content-center">
-                  <Card.Title>{category}</Card.Title>
-                </Card.Body>
-              </Card>
+    <>
+      {/* Full-screen tunnel background */}
+      <TunnelBackground />
+      <Container fluid>
+        <div className={styles.categoryGrid}>
+          {categories.map((category) => (
+            <Link key={category} href={`/artworks/show?medium=${encodeURIComponent(category)}`} passHref>
+              <div className={styles.cardCategory}>
+                <h3 className={styles.cardCategoryTitle}>{category}</h3>
+              </div>
             </Link>
-          </Col>
-        ))}
-      </Row>
-    </Container>
+          ))}
+        </div>
+      </Container>
+    </>
   );
 }

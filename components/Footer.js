@@ -9,7 +9,7 @@ export default function Footer() {
   const isHome = router.pathname === '/';
   const { theme, setTheme } = useContext(ThemeContext);
   return (
-    <footer className={`${isHome ? 'bg-transparent' : 'bg-light'} text-dark border-top border-secondary`}>
+    <footer className="bg-transparent text-dark border-0">
       <Container className="d-flex justify-content-between align-items-center py-3">
         <div>&copy; {new Date().getFullYear()} Art Portfolio. All rights reserved.</div>
         <Dropdown align="end">

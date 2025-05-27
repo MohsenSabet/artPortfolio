@@ -1,0 +1,33 @@
+/* Styles for Artworks page category widgets */
+.categoryGrid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2rem;
+}
+.cardCategory {
+  width: 160px;
+  height: 160px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+.cardCategory:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.25);
+}
+.cardCategoryTitle {
+  font-size: 1.25rem;
+  color: #ffffff;
+  text-align: center;
+  margin: 0;
+  font-weight: 600;
+}

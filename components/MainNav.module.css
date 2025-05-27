@@ -1,17 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@400;700&display=swap');
 
 .neonNav {
-  background-color: #1a1a1a;
+  background-color: transparent !important;
   position: sticky;
   top: 0;
   width: 100%;
   z-index: 1000;
-  box-shadow: 0 0 10px #39ff14, 0 0 20px #39ff14, 0 0 40px #39ff14;
-  border-bottom: 1px solid #39ff14;
-}
-
-.transparent {
-  background-color: transparent !important;
   box-shadow: none !important;
   border: none !important;
 }
