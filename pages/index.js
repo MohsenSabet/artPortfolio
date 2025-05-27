@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/router';
 import { FaTwitter, FaLinkedin, FaInstagram } from 'react-icons/fa';
+import homeStyles from '@/styles/Home.module.css';
 import styles from '@/styles/SocialMediaHover.module.css';
 
 // client-only 3D background
@@ -85,19 +86,11 @@ export default function Home() {
         }}
       >
         <motion.h1
+          className={homeStyles.rippleText}
           initial={{ opacity: 0, y: 60, scale: 0.85 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ delay: 0.2, duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
-          style={{
-            fontFamily: 'Great Vibes, cursive',
-            fontSize: '4rem',
-            background: 'linear-gradient(90deg, #ff9ce6, #6ec1ff)',
-            backgroundClip: 'text',
-            WebkitBackgroundClip: 'text',
-            color: 'transparent',
-            textAlign: 'center',
-            padding: '0 1rem'
-          }}
+          style={{ fontFamily: 'Great Vibes, cursive', fontSize: '4rem', textAlign: 'center', padding: '0 1rem' }}
         >
           Welcome to My Portfolio
         </motion.h1>
