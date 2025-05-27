@@ -1,0 +1,52 @@
+/* Glassmorphism card for summary widgets */
+.glassCard {
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.3);  /* Dark translucent for contrast */
+  backdrop-filter: blur(20px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  cursor: pointer;
+}
+.glassCard:hover {
+  transform: translateY(-5px) scale(1.02);
+  border-color: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.6);
+}
+
+/* Selected border/glow states */
+.gradientAll {
+  background: rgba(255,255,255,0.05) !important;
+  border: 2px solid #6b73ff !important;
+  box-shadow: 0 0 12px rgba(107, 115, 255, 0.8) !important;
+}
+.gradientPublic {
+  background: rgba(255,255,255,0.05) !important;
+  border: 2px solid #34e89e !important;
+  box-shadow: 0 0 12px rgba(52, 232, 158, 0.8) !important;
+}
+.gradientPrivate {
+  background: rgba(255,255,255,0.05) !important;
+  border: 2px solid #f8b500 !important;
+  box-shadow: 0 0 12px rgba(248, 181, 0, 0.8) !important;
+}
+.gradientFeatured {
+  background: rgba(255,255,255,0.05) !important;
+  border: 2px solid #5b86e5 !important;
+  box-shadow: 0 0 12px rgba(91, 134, 229, 0.8) !important;
+}
+
+/* Frosted glass for additional widgets */
+.glassWidget {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  border: none;
+  color: #fff;
+  transition: transform 0.3s ease;
+}
+.glassWidget:hover {
+  transform: translateY(-5px);
+}

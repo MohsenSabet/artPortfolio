@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import { Container, Row, Col, Card, Button, Table, Spinner, Alert, ProgressBar, ListGroup } from 'react-bootstrap';
 import { FaPlus, FaUserEdit, FaTasks } from 'react-icons/fa';
+import styles from '@/styles/Dashboard.module.css';
 
 export default function DashboardHome() {
   const [session, setSession] = useState(null);
@@ -81,10 +82,7 @@ export default function DashboardHome() {
       <Row className="mb-4">
         <Col md={3} sm={6} className="mb-3">
           <Card
-            bg={filter === 'all' ? 'primary' : 'light'}
-            text={filter === 'all' ? 'white' : 'dark'}
-            className="h-100"
-            style={{ cursor: 'pointer' }}
+            className={`${styles.glassCard} h-100 ${filter === 'all' ? styles.gradientAll : ''}`}
             onClick={() => setFilter('all')}
           >
             <Card.Body className="d-flex flex-column justify-content-center">
@@ -95,10 +93,7 @@ export default function DashboardHome() {
         </Col>
         <Col md={3} sm={6} className="mb-3">
           <Card
-            bg={filter === 'public' ? 'success' : 'light'}
-            text={filter === 'public' ? 'white' : 'dark'}
-            className="h-100"
-            style={{ cursor: 'pointer' }}
+            className={`${styles.glassCard} h-100 ${filter === 'public' ? styles.gradientPublic : ''}`}
             onClick={() => setFilter('public')}
           >
             <Card.Body className="d-flex flex-column justify-content-center">
@@ -109,10 +104,7 @@ export default function DashboardHome() {
         </Col>
         <Col md={3} sm={6} className="mb-3">
           <Card
-            bg={filter === 'private' ? 'warning' : 'light'}
-            text={filter === 'private' ? 'dark' : 'dark'}
-            className="h-100"
-            style={{ cursor: 'pointer' }}
+            className={`${styles.glassCard} h-100 ${filter === 'private' ? styles.gradientPrivate : ''}`}
             onClick={() => setFilter('private')}
           >
             <Card.Body className="d-flex flex-column justify-content-center">
@@ -123,10 +115,7 @@ export default function DashboardHome() {
         </Col>
         <Col md={3} sm={6} className="mb-3">
           <Card
-            bg={filter === 'featured' ? 'info' : 'light'}
-            text={filter === 'featured' ? 'white' : 'dark'}
-            className="h-100"
-            style={{ cursor: 'pointer' }}
+            className={`${styles.glassCard} h-100 ${filter === 'featured' ? styles.gradientFeatured : ''}`}
             onClick={() => setFilter('featured')}
           >
             <Card.Body className="d-flex flex-column justify-content-center">
@@ -140,7 +129,7 @@ export default function DashboardHome() {
       {/* Additional widgets */}
       <Row className="mb-5 g-4">
         <Col md={4}>
-          <Card className="h-100">
+          <Card className={`${styles.glassWidget} h-100`}>
             <Card.Body>
               <Card.Title>Profile Completeness</Card.Title>
               <ProgressBar now={completeness} label={`${completeness}%`} />
@@ -148,7 +137,7 @@ export default function DashboardHome() {
           </Card>
         </Col>
         <Col md={4}>
-          <Card className="h-100">
+          <Card className={`${styles.glassWidget} h-100`}>
             <Card.Body>
               <Card.Title>Recent Posts</Card.Title>
               <ListGroup variant="flush">
@@ -164,7 +153,7 @@ export default function DashboardHome() {
           </Card>
         </Col>
         <Col md={4}>
-          <Card className="h-100">
+          <Card className={`${styles.glassWidget} h-100`}>
             <Card.Body className="d-flex flex-column">
               <Card.Title>Quick Actions</Card.Title>
               <Button as={Link} href="/dashboard/addPost" variant="success" className="mb-2"><FaPlus className="me-1"/>Add Post</Button>
