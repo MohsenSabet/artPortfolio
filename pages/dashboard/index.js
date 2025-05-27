@@ -8,6 +8,7 @@ export default function DashboardHome() {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
+  const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -34,7 +35,7 @@ export default function DashboardHome() {
   async function fetchPosts(userId) {
     const { data, error } = await supabase
       .from('posts')
-      .select('id, title, created_at, privacy, featured')  // include privacy & featured
+      .select('id, title, created_at, media_url, privacy, featured')  // include media_url for thumbnails
       .eq('author_id', userId)
       .order('created_at', { ascending: false });
     if (error) throw error;
@@ -58,6 +59,15 @@ export default function DashboardHome() {
   const publicPosts = posts.filter(p => p.privacy === 'Public').length;
   const privatePosts = posts.filter(p => p.privacy === 'Private').length;
   const featuredPosts = posts.filter(p => p.featured).length;
+  // Filtered posts based on selection
+  const displayedPosts = (() => {
+    switch (filter) {
+      case 'public': return posts.filter(p => p.privacy === 'Public');
+      case 'private': return posts.filter(p => p.privacy === 'Private');
+      case 'featured': return posts.filter(p => p.featured);
+      default: return posts;
+    }
+  })();
   // Profile completeness calculation
   const totalFields = 4;
   const filledFields = ['first_name', 'last_name', 'avatar_url', 'bio'].reduce((acc, field) => profile[field] ? acc + 1 : acc, 0);
@@ -70,7 +80,13 @@ export default function DashboardHome() {
       {/* Summary widgets */}
       <Row className="mb-4">
         <Col md={3} sm={6} className="mb-3">
-          <Card bg="primary" text="white" className="h-100">
+          <Card
+            bg={filter === 'all' ? 'primary' : 'light'}
+            text={filter === 'all' ? 'white' : 'dark'}
+            className="h-100"
+            style={{ cursor: 'pointer' }}
+            onClick={() => setFilter('all')}
+          >
             <Card.Body className="d-flex flex-column justify-content-center">
               <Card.Title>Total Posts</Card.Title>
               <h2 className="fw-bold text-center">{totalPosts}</h2>
@@ -78,7 +94,13 @@ export default function DashboardHome() {
           </Card>
         </Col>
         <Col md={3} sm={6} className="mb-3">
-          <Card bg="success" text="white" className="h-100">
+          <Card
+            bg={filter === 'public' ? 'success' : 'light'}
+            text={filter === 'public' ? 'white' : 'dark'}
+            className="h-100"
+            style={{ cursor: 'pointer' }}
+            onClick={() => setFilter('public')}
+          >
             <Card.Body className="d-flex flex-column justify-content-center">
               <Card.Title>Public Posts</Card.Title>
               <h2 className="fw-bold text-center">{publicPosts}</h2>
@@ -86,7 +108,13 @@ export default function DashboardHome() {
           </Card>
         </Col>
         <Col md={3} sm={6} className="mb-3">
-          <Card bg="warning" text="dark" className="h-100">
+          <Card
+            bg={filter === 'private' ? 'warning' : 'light'}
+            text={filter === 'private' ? 'dark' : 'dark'}
+            className="h-100"
+            style={{ cursor: 'pointer' }}
+            onClick={() => setFilter('private')}
+          >
             <Card.Body className="d-flex flex-column justify-content-center">
               <Card.Title>Private Posts</Card.Title>
               <h2 className="fw-bold text-center">{privatePosts}</h2>
@@ -94,7 +122,13 @@ export default function DashboardHome() {
           </Card>
         </Col>
         <Col md={3} sm={6} className="mb-3">
-          <Card bg="info" text="white" className="h-100">
+          <Card
+            bg={filter === 'featured' ? 'info' : 'light'}
+            text={filter === 'featured' ? 'white' : 'dark'}
+            className="h-100"
+            style={{ cursor: 'pointer' }}
+            onClick={() => setFilter('featured')}
+          >
             <Card.Body className="d-flex flex-column justify-content-center">
               <Card.Title>Featured Posts</Card.Title>
               <h2 className="fw-bold text-center">{featuredPosts}</h2>
@@ -167,24 +201,33 @@ export default function DashboardHome() {
                 <Button variant="success">+ Add New Post</Button>
               </Link>
             </Card.Header>
-            <Card.Body className="p-0">
-              {posts.length === 0 ? (
-                <p className="p-4 text-center text-muted">No posts found.</p>
-              ) : (
-                <Table hover responsive className="mb-0">
-                  <thead>
-                    <tr>
-                      <th>Title</th>
-                      <th>Date Created</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {posts.map((post) => (
-                      <tr key={post.id}>
-                        <td>{post.title}</td>
-                        <td>{new Date(post.created_at).toLocaleDateString()}</td>
-                        <td>
+            <Card.Body className="p-0">  
+              
+               {displayedPosts.length === 0 ? (
+                <p className="p-4 text-center text-muted">No posts found for this filter.</p>
+               ) : (
+                 <Table hover responsive className="mb-0">
+                   <thead>
+                     <tr>
+                       <th>Thumbnail</th>
+                       <th>Title</th>
+                       <th>Date Created</th>
+                       <th>Actions</th>
+                     </tr>
+                   </thead>
+                   <tbody>
+                    {displayedPosts.map((post) => (
+                       <tr key={post.id}>
+                         <td>
+                           <img
+                             src={post.media_url}
+                             alt={post.title}
+                             style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }}
+                           />
+                         </td>
+                         <td>{post.title}</td>
+                         <td>{new Date(post.created_at).toLocaleDateString()}</td>
+                         <td>
                           <Link href={`/dashboard/editPost?id=${post.id}`} passHref>
                             <Button size="sm" variant="outline-primary" className="me-2">Edit</Button>
                           </Link>
@@ -192,11 +235,11 @@ export default function DashboardHome() {
                             <Button size="sm" variant="outline-secondary">View</Button>
                           </Link>
                         </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              )}
+                       </tr>
+                     ))}
+                   </tbody>
+                 </Table>
+               )}
             </Card.Body>
           </Card>
         </Col>
