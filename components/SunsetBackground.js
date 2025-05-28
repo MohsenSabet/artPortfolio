@@ -52,7 +52,7 @@ const patternFn = /* glsl */`
   }
 `;
 
-// ———— Nguyen2007 fractal + palette modulation with separate time scales ————
+// ———— Nguyen2007 fractal + palette modulation ————
 const vertexShader = /* glsl */`
   void main() {
     gl_Position = vec4(position, 1.0);
@@ -69,13 +69,12 @@ const fragmentShader = /* glsl */`
   ${fbm1}
   ${patternFn}
 
-  // exact Nguyen2007 fractal loop, using slower time for flashes
+  // exact Nguyen2007 fractal loop (flashes at half speed)
   void mainImage(out vec4 o, vec2 u) {
     vec2 v = uResolution.xy;
          u = .2 * (u + u - v) / v.y;
-    vec4 z = o = vec4(1.0, 2.0, 3.0, 0.0);
-
-    // FLASH_SPEED = 0.5 → flashes run at half speed
+    o = vec4(1.0, 2.0, 3.0, 0.0);
+    vec4 z = o;
     for (float a = .5, t = uTime * 0.5, i; ++i < 19.0; ) {
       o += (1.0 + cos(z + t)) /
            length((1.0 + i * dot(v, v)) *
@@ -92,37 +91,36 @@ const fragmentShader = /* glsl */`
          + .2 * a * u
          + cos(4.0 / exp(dot(o, o) / 100.0) + t) / 300.0;
     }
-
     o = 25.6 / (min(o, 13.0) + 164.0 / o) - dot(u, u) / 250.0;
   }
 
   void main() {
-    // 1) get raw fractal brightness with slow flashes
+    // 1) raw fractal brightness (slow flashes)
     vec4 raw;
     mainImage(raw, gl_FragCoord.xy);
     float b = raw.r;
 
-    // 2) compute palette noise vectors with faster background movement
+    // 2) palette vectors (fast bg movement)
     vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution) / uResolution.y;
-    // BG_SPEED = 0.1 → movement at double the original speed (1/10 instead of 1/20)
     float tBg = uTime * 0.1;
     vec2 q, r;
     pattern(uv, 43758.5453123, tBg, q, r);
 
-    // 3) reconstruct and colorize
+    // 3) reconstruct your original palette
+    float QR = clamp(dot(q, r), -1.0, 1.0);
     vec3 c = vec3(
-      (q.x + q.y) + clamp(dot(q, r), -1.0, 1.0) * 30.0,
-      clamp(dot(q, r), -1.0, 1.0) * 15.0,
-      r.x * r.y + clamp(dot(q, r), -1.0, 1.0) * 5.0
+      (q.x + q.y) + QR * 30.0,
+      QR * 15.0,
+      r.x * r.y + QR * 5.0
     );
-    c += 0.1;
-    c = clamp(c, 0.05, 0.8);
+    // clamp palette alone, no ambient lift
+    c = clamp(c, 0.0, 1.0);
 
-    // 4) modulate by fractal brightness
+    // 4) modulate fully by brightness → black background where b≈0
     c *= b;
 
-    // 5) boost saturation slightly, clamp to avoid whites
-    c *= 1.3;
+    // 5) slight saturation boost, clamp to avoid clipping
+    c *= 1.4;
     c = clamp(c, 0.0, 1.0);
 
     gl_FragColor = vec4(c, 1.0);
@@ -163,7 +161,7 @@ function ShaderMesh() {
   );
 }
 
-export default function SaturatedNguyenBackground() {
+export default function CleanNguyenBackground() {
   return (
     <Canvas
       frameloop="always"
