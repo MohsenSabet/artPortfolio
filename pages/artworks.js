@@ -6,8 +6,8 @@ import styles from '@/styles/Artworks.module.css';
 import { supabase } from '@/lib/supabaseClient';
 
 // client-only tunnel shader background
-const TunnelBackground = dynamic(
-  () => import('@/components/TunnelBackground'),
+const WarpBackground = dynamic(
+  () => import('@/components/WarpBackground'),
   { ssr: false }
 );
 
@@ -27,7 +27,7 @@ export default function Artworks({ categories }) {
   return (
     <>
       {/* Full-screen tunnel background */}
-      <TunnelBackground />
+      <WarpBackground/>
       <Container fluid>
         <div className={styles.categoryGrid}>
           {categories.map((category) => (
