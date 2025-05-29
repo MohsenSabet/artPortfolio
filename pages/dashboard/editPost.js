@@ -10,7 +10,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 export default function EditPost() {
   const router = useRouter();
   const { id } = router.query;
-  const [formData, setFormData] = useState({ title: '', media_url: '', category: 'Painting', privacy: 'Public', include_date: false, date: '', include_time: false, time: '', featured: false, description: '' });
+  const [formData, setFormData] = useState({ title: '', media_url: '', category: 'Painting', privacy: 'Public', include_date: false, date: '', featured: false, description: '' });
   const [status, setStatus] = useState({ loading: false, error: null });
   const [mediaFile, setMediaFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
@@ -123,9 +123,6 @@ export default function EditPost() {
             className="form-control mb-3"
           />
         )}
-
-        <Form.Check type="checkbox" label="Include Time" name="include_time" checked={formData.include_time} onChange={handleChange} />
-        {formData.include_time && <Form.Control type="time" name="time" value={formData.time} onChange={handleChange} className="mb-3" />}
 
         <Form.Check type="checkbox" label="Featured" name="featured" checked={formData.featured} onChange={handleChange} className="mb-3" />
 
