@@ -35,15 +35,20 @@ export default function MainNav() {
             <Nav.Link as={Link} href="/">Home</Nav.Link>
             <Nav.Link as={Link} href="/about">About</Nav.Link>
             <Nav.Link as={Link} href="/artworks">Artworks</Nav.Link>
-            <Nav.Link as={Link} href="/portfolio">Portfolio</Nav.Link>
-            <NavDropdown title="Dashboard" id="dashboard-nav-dropdown">
-              <NavDropdown.Item as={Link} href="/dashboard">Overview</NavDropdown.Item>
-              <NavDropdown.Item as={Link} href="/dashboard/profile">Admin Profile</NavDropdown.Item>
-              <NavDropdown.Item as={Link} href="/dashboard/editProfile">Edit Profile</NavDropdown.Item>
-              <NavDropdown.Item as={Link} href="/dashboard/addPost">Add Post</NavDropdown.Item>
-              <NavDropdown.Item as={Link} href="/dashboard/editPost">Edit Post</NavDropdown.Item>
-              <NavDropdown.Item as={Link} href="/dashboard/managePost">Manage Posts</NavDropdown.Item>
-            </NavDropdown>
+            {/* Show portfolio and dashboard only to authenticated users */}
+            {session && (
+              <>
+                <Nav.Link as={Link} href="/portfolio">Portfolio</Nav.Link>
+                <NavDropdown title="Dashboard" id="dashboard-nav-dropdown">
+                  <NavDropdown.Item as={Link} href="/dashboard">Overview</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} href="/dashboard/profile">Admin Profile</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} href="/dashboard/editProfile">Edit Profile</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} href="/dashboard/addPost">Add Post</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} href="/dashboard/editPost">Edit Post</NavDropdown.Item>
+                  <NavDropdown.Item as={Link} href="/dashboard/managePost">Manage Posts</NavDropdown.Item>
+                </NavDropdown>
+              </>
+            )}
           </Nav>
           <Nav className="ms-auto">
             {session ? (

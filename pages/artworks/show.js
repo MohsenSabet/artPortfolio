@@ -4,6 +4,7 @@ import { Container, Row, Col, Button } from 'react-bootstrap';
 import Link from 'next/link';
 import ArtworkCard from '@/components/ArtworkCard';
 import { supabase } from '@/lib/supabaseClient';
+import styles from '@/styles/Show.module.css';
 
 // client-only sunset shader background
 const SunsetBackground = dynamic(
@@ -17,6 +18,7 @@ export async function getServerSideProps({ query }) {
     .from('posts')
     .select('*, profiles(first_name,last_name,avatar_url,username,pronouns)')
     .eq('category', medium)
+    .eq('privacy', 'Public')
     .order('created_at', { ascending: false });
   if (error) console.error('Error fetching posts for medium', medium, error.message);
   return { props: { posts: posts || [], medium } };
@@ -43,7 +45,7 @@ export default function ArtworksByMedium({ posts, medium }) {
         <Link href="/artworks" passHref>
           
         </Link>
-        <h1 className="mb-4">Artworks: {medium}</h1>
+        <h1 className={`mb-4 ${styles.title}`}>{medium}</h1>
         {/* Main featured artwork */}
         <Row className="justify-content-center mb-0">
           <Col md={4} className="text-center">

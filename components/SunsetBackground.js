@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useLayoutEffect } from 'react';
+import React, { useRef, useLayoutEffect, memo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
@@ -161,7 +161,7 @@ function ShaderMesh() {
   );
 }
 
-export default function CleanNguyenBackground() {
+function CleanNguyenBackground() {
   return (
     <Canvas
       frameloop="always"
@@ -180,3 +180,5 @@ export default function CleanNguyenBackground() {
     </Canvas>
   );
 }
+
+export default memo(CleanNguyenBackground);

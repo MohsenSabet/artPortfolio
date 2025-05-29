@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
+import { useRouter } from 'next/router';
 import { Container, Row, Col, Card, Button, Spinner, Alert, ProgressBar, ListGroup } from 'react-bootstrap';
 import { FaPlus, FaUserEdit, FaTasks, FaClipboardList, FaGlobe, FaLock, FaStar, FaImage, FaCalendarAlt, FaEye, FaEdit, FaTrash } from 'react-icons/fa';
 import styles from '@/styles/Dashboard.module.css';
 
 export default function DashboardHome() {
+  const router = useRouter();
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
@@ -15,7 +17,7 @@ export default function DashboardHome() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) return setError('Please login to view your dashboard.');
+      if (!session) router.push('/login');
       setSession(session);
       Promise.all([fetchProfile(session.user.id), fetchPosts(session.user.id)])
         .catch((err) => setError(err.message))

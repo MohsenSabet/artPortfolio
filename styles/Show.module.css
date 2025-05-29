@@ -1,0 +1,23 @@
+/* Styles for the show page title */
+.title {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 600;
+  font-family: 'Playfair Display', serif;
+  text-transform: capitalize;
+  text-align: center;
+  color: #333;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.title::after {
+  content: '';
+  width: 50px;
+  height: 3px;
+  background-color: #feb47b;
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 2px;
+}

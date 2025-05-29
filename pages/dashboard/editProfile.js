@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
-import { Container, Card, Form, Button, Row, Col, Alert } from 'react-bootstrap';
+import { Container, Card, Form, Button, Row, Col, Alert, Modal } from 'react-bootstrap';
 import { FaEnvelope, FaPhone, FaTwitter, FaLinkedin, FaInstagram } from 'react-icons/fa';
 
 export default function EditProfile() {
@@ -25,6 +25,20 @@ export default function EditProfile() {
   const [mediums, setMediums] = useState([]);
   const [newMedium, setNewMedium] = useState('');
   const [userId, setUserId] = useState(null);
+  // Password change state (inline)
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [pwError, setPwError] = useState(null);
+  const [pwSuccess, setPwSuccess] = useState(false);
+  const [showPwModal, setShowPwModal] = useState(false);
+
+  // Preset medium options
+  const presetMediums = ['Painting', 'Illustration', 'Photography', 'Digital', 'Other'];
+
+  // Toggle a medium in the list
+  const toggleMedium = (m) => {
+    setMediums(prev => prev.includes(m) ? prev.filter(x => x !== m) : [...prev, m]);
+  };
 
   // Fetch profile on mount
   useEffect(() => {
@@ -55,10 +69,18 @@ export default function EditProfile() {
     loadProfile();
   }, [router]);
 
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) router.push('/login');
+    });
+  }, [router]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
+    setPwError(null);
+    setPwSuccess(false);
 
     // If a new profile image was selected, upload it to storage and get its public URL
     let avatar_url = profilePic;
@@ -109,9 +131,35 @@ export default function EditProfile() {
       .single();
     if (error) {
       setError(error.message);
+      return;
+    }
+    // If password fields filled, update password
+    if (newPassword || confirmPassword) {
+      if (newPassword !== confirmPassword) {
+        setPwError('Passwords do not match');
+      } else {
+        const { error: pwErr } = await supabase.auth.updateUser({ password: newPassword });
+        if (pwErr) setPwError(pwErr.message);
+        else setPwSuccess(true);
+      }
+    }
+    // Redirect after profile update
+    router.push('/dashboard/profile');
+  };
+
+  const handlePasswordChange = async () => {
+    if (newPassword !== confirmPassword) {
+      setPwError('Passwords do not match');
+      return;
+    }
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+      setPwError(error.message);
     } else {
-      // redirect to profile to view changes
-      router.push('/dashboard/profile');
+      setPwSuccess(true);
+      setNewPassword('');
+      setConfirmPassword('');
+      setShowPwModal(false);
     }
   };
 
@@ -121,12 +169,13 @@ export default function EditProfile() {
     <Container className="mt-5">
       {error && <Alert variant="danger">{error}</Alert>}
       {success && <Alert variant="success">Profile updated!</Alert>}
+      {pwError && <Alert variant="danger">{pwError}</Alert>}
+      {pwSuccess && <Alert variant="success">Password updated successfully!</Alert>}
+
+      {/* Edit Profile Card */}
       <Card style={{ maxWidth: '600px', margin: '0 auto', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
         <Card.Header as="h4" className="d-flex justify-content-between align-items-center">
           Edit Profile
-          <Link href="/dashboard/profile" passHref>
-            <Button variant="outline-secondary" size="sm">Cancel</Button>
-          </Link>
         </Card.Header>
         <Card.Body>
           <Form onSubmit={handleSubmit}>
@@ -238,18 +287,27 @@ export default function EditProfile() {
             </Form.Group>
 
             <Form.Group controlId="mediums" className="mb-4">
-              <Form.Label>Mediums (select or add custom)</Form.Label>
+              <Form.Label>Mediums (select presets or add custom)</Form.Label>
               <div className="mb-2">
-                {mediums.map((m) => (
+                {/* Preset options */}
+                {presetMediums.map((m) => (
                   <Button
                     key={m}
                     variant={mediums.includes(m) ? 'primary' : 'outline-primary'}
                     size="sm"
                     className="me-2 mb-2"
                     onClick={() => toggleMedium(m)}
-                  >
-                    {m}
-                  </Button>
+                  >{m}</Button>
+                ))}
+                {/* Custom mediums */}
+                {mediums.filter(m => !presetMediums.includes(m)).map((m) => (
+                  <Button
+                    key={m}
+                    variant="success"
+                    size="sm"
+                    className="me-2 mb-2"
+                    onClick={() => toggleMedium(m)}
+                  >{m}</Button>
                 ))}
               </div>
               <Row>
@@ -262,21 +320,58 @@ export default function EditProfile() {
                 </Col>
                 <Col xs="auto">
                   <Button onClick={() => {
-                    if (newMedium.trim()) {
-                      setMediums([...mediums, newMedium.trim()]);
+                    const trimmed = newMedium.trim();
+                    if (trimmed && !mediums.includes(trimmed)) {
+                      setMediums(prev => [...prev, trimmed]);
                       setNewMedium('');
                     }
-                  }}>Add</Button>
+                  }} size="sm">Add</Button>
                 </Col>
               </Row>
             </Form.Group>
 
             <div className="d-flex justify-content-end">
-              <Button variant="success" type="submit">Save Changes</Button>
+             {/* Change password trigger */}
+             <Button variant="warning" onClick={() => setShowPwModal(true)}>Change Password</Button>
             </div>
           </Form>
         </Card.Body>
+        {/* Footer with Change Password button */}
+        <Card.Footer className="d-flex justify-content-between">
+          {/* Cancel edits */}
+          <Link href="/dashboard/profile" passHref>
+            <Button variant="outline-secondary">Cancel</Button>
+          </Link>
+           <Button variant="success" type="submit">Save Changes</Button>
+        </Card.Footer>
       </Card>
+
+      {/* Password Change Modal */}
+      <Modal show={showPwModal} onHide={() => setShowPwModal(false)} backdrop="static" centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Change Password</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {pwError && <Alert variant="danger">{pwError}</Alert>}
+          {pwSuccess && <Alert variant="success">Password updated!</Alert>}
+          <Form>
+            <Form.Group controlId="newPassword" className="mb-3">
+              <Form.Label>New Password</Form.Label>
+              <Form.Control type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+            </Form.Group>
+            <Form.Group controlId="confirmPassword" className="mb-3">
+              <Form.Label>Confirm Password</Form.Label>
+              <Form.Control type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowPwModal(false)}>Close</Button>
+          <Button variant="primary" onClick={() => { setPwError(null); setPwSuccess(false); handlePasswordChange(); }}>
+            Update Password
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }

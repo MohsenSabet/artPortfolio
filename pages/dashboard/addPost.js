@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Form, Button, Row, Col, Alert } from 'react-bootstrap';
 import { FaArrowLeft, FaImage, FaPaperclip } from 'react-icons/fa';
 import { useRouter } from 'next/router';
@@ -10,6 +10,11 @@ import 'react-datepicker/dist/react-datepicker.css';
 
 export default function AddPost() {
   const router = useRouter();
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) router.push('/login');
+    });
+  }, [router]);
   const [formData, setFormData] = useState({ media: null, title: '', category: 'Painting', description: '', privacy: 'Public', includeDate: false, date: null, includeTime: false, time: '', featured: false });
   const [previewUrl, setPreviewUrl] = useState(null);
   const [errors, setErrors] = useState({});

@@ -16,6 +16,7 @@ export async function getServerSideProps() {
   const { data, error } = await supabase
     .from('posts')
     .select('category')
+    .eq('privacy', 'Public')
     .order('category', { ascending: true });
   if (error) console.error('Error fetching categories:', error.message);
   const categories = Array.from(new Set((data || []).map((p) => p.category)));
