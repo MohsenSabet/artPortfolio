@@ -53,15 +53,10 @@ export default function Home() {
        mouseY.set(window.innerHeight / 2);
      }
    }, []);
-   const smoothX = useSpring(mouseX, { stiffness: 50, damping: 15 });
-   const smoothY = useSpring(mouseY, { stiffness: 50, damping: 15 });
-   const maskStyle = useTransform([smoothX, smoothY], ([x, y]) =>
-     `radial-gradient(circle 200px at ${x}px ${y}px, transparent 0%, transparent 140px, rgba(0,0,0,0.5) 200px, black 260px)`
-   );
-   const onMouseMove = (e) => {
-     mouseX.set(e.clientX);
-     mouseY.set(e.clientY);
-   };
+ 
+   
+  
+   
 
    // Load profile
    useEffect(() => {
@@ -84,7 +79,7 @@ export default function Home() {
      <div
        ref={containerRef}
        onWheel={onWheel}
-       onMouseMove={onMouseMove}
+      
        style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}
      >
       {background}
@@ -102,11 +97,22 @@ export default function Home() {
           zIndex: 2
         }}
       >
-        <img
+        <motion.img
           src="/logo.svg"
           alt="Logo"
           style={{ width: 340, height: 340, marginBottom: '2.5rem', userSelect: 'none' }}
           draggable={false}
+          animate={{
+            // Even more graceful, less bouncy heartbeat
+            scale: [1, 1.035, 0.99, 1.025, 1],
+          }}
+          transition={{
+            duration: 4.8,
+            repeat: Infinity,
+            repeatType: 'loop',
+            times: [0, 0.18, 0.32, 0.44, 1],
+            ease: ['easeInOut', 'easeInOut', 'easeInOut', 'easeInOut'],
+          }}
         />
         <a
           onMouseEnter={() => {
@@ -141,8 +147,6 @@ export default function Home() {
            width: '100%', height: '100%',
            pointerEvents: 'none',
            backdropFilter: maskFilter,
-           maskImage: maskStyle,
-           WebkitMaskImage: maskStyle,
            maskPosition: 'center',
            WebkitMaskPosition: 'center',
            maskRepeat: 'no-repeat',
