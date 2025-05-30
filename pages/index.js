@@ -92,14 +92,13 @@ export default function Home() {
             draggable={false}
             style={{ width: 340, height: 340, marginBottom: '2.5rem', userSelect: 'none', cursor: 'pointer' }}
             animate={{
-              scale: [1, 1.035, 0.99, 1.025, 1],
+              scale: [1, 1.04, 1],
             }}
             transition={{
-              duration: 4.8,
+              duration: 3,
               repeat: Infinity,
-              repeatType: 'loop',
-              times: [0, 0.18, 0.32, 0.44, 1],
-              ease: ['easeInOut', 'easeInOut', 'easeInOut', 'easeInOut'],
+              repeatType: 'reverse',
+              ease: 'easeInOut',
             }}
             onMouseEnter={() => {
               animate(bgSpeed, 20, { duration: 0.6 });
