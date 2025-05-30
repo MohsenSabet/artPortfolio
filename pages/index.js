@@ -2,10 +2,8 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, useMotionValue, useTransform, useSpring, animate } from 'framer-motion';
 import { bgSpeed } from '@/lib/bgSpeed';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
-import { FaTwitter, FaLinkedin, FaInstagram } from 'react-icons/fa';
-import homeStyles from '@/styles/Home.module.css';
-import styles from '@/styles/SocialMediaHover.module.css';
 
 // client-only 3D background
 const ThreeBackground = dynamic(() => import('@/components/ThreeBackground'), { ssr: false });
@@ -19,22 +17,24 @@ export default function Home() {
    const maskLevel = useMotionValue(0.99);
    const maskFilter = useTransform(maskLevel, g => `grayscale(${g * 100}%)`);
 
+   // pulsing circular mask hole around logo
+   const maskRadius = useMotionValue(170);
+   useEffect(() => {
+     animate(maskRadius, [170, 185, 165, 180, 170], {
+       duration: 4.8,
+       repeat: Infinity,
+       repeatType: 'loop',
+       ease: 'easeInOut'
+     });
+   }, []);
+   const maskImage = useTransform(maskRadius, r =>
+     `radial-gradient(circle ${r}px at center, transparent ${r}px, black ${r + 40}px)`
+   );
+
    // Scroll-driven animation hooks
    const progress = useMotionValue(0);
    const smooth = useSpring(progress, { stiffness: 60, damping: 25 });
 
-   const buttonOpacity = useTransform(smooth, [0.95, 1], [0, 1]);
-   const buttonY = useTransform(smooth, [0.95, 1], [80, 0]);
-
-   // Staggered scroll-driven transforms for separate elements
-   const imageOpacity = useTransform(smooth, [0.4, 0.6], [0, 1]);
-   const imageY = useTransform(smooth, [0.4, 0.6], [80, 0]);
-   const socialOpacity = useTransform(smooth, [0.5, 0.7], [0, 1]);
-   const socialY = useTransform(smooth, [0.5, 0.7], [80, 0]);
-   const nameOpacity = useTransform(smooth, [0.55, 0.75], [0, 1]);
-   const nameY = useTransform(smooth, [0.55, 0.75], [80, 0]);
-   const bioOpacity = useTransform(smooth, [0.6, 0.8], [0, 1]);
-   const bioY = useTransform(smooth, [0.6, 0.8], [80, 0]);
 
    const containerRef = useRef(null);
    const onWheel = (e) => {
@@ -43,19 +43,7 @@ export default function Home() {
      progress.set(Math.min(Math.max(progress.get() + delta, 0), 1));
    };
   
-   // Mouse-driven spotlight with framer-motion spring smoothing
-   const mouseX = useMotionValue(0);
-   const mouseY = useMotionValue(0);
-   // set initial center position on client only
-   useEffect(() => {
-     if (typeof window !== 'undefined') {
-       mouseX.set(window.innerWidth / 2);
-       mouseY.set(window.innerHeight / 2);
-     }
-   }, []);
- 
    
-  
    
 
    // Load profile
@@ -97,47 +85,32 @@ export default function Home() {
           zIndex: 2
         }}
       >
-        <motion.img
-          src="/logo.svg"
-          alt="Logo"
-          style={{ width: 340, height: 340, marginBottom: '2.5rem', userSelect: 'none' }}
-          draggable={false}
-          animate={{
-            // Even more graceful, less bouncy heartbeat
-            scale: [1, 1.035, 0.99, 1.025, 1],
-          }}
-          transition={{
-            duration: 4.8,
-            repeat: Infinity,
-            repeatType: 'loop',
-            times: [0, 0.18, 0.32, 0.44, 1],
-            ease: ['easeInOut', 'easeInOut', 'easeInOut', 'easeInOut'],
-          }}
-        />
-        <a
-          onMouseEnter={() => {
-            animate(bgSpeed, 20, { duration: 0.6 });
-            animate(maskLevel, 0, { duration: 0.9 });
-          }}
-          onMouseLeave={() => {
-            animate(bgSpeed, 1, { duration: 0.5 });
-            animate(maskLevel, 0.8, { duration: 0.5 });
-          }}
-          href="/artworks"
-          style={{
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            color: '#fafafa',
-            fontSize: '2rem',
-            cursor: 'pointer',
-            textDecoration: 'none',
-            letterSpacing: '1px',
-            marginTop: 0
-          }}
-        >
-          View My Artworks
-        </a>
+        <Link href="/artworks" passHref>
+          <motion.img
+            src="/logo.svg"
+            alt="Logo"
+            draggable={false}
+            style={{ width: 340, height: 340, marginBottom: '2.5rem', userSelect: 'none', cursor: 'pointer' }}
+            animate={{
+              scale: [1, 1.035, 0.99, 1.025, 1],
+            }}
+            transition={{
+              duration: 4.8,
+              repeat: Infinity,
+              repeatType: 'loop',
+              times: [0, 0.18, 0.32, 0.44, 1],
+              ease: ['easeInOut', 'easeInOut', 'easeInOut', 'easeInOut'],
+            }}
+            onMouseEnter={() => {
+              animate(bgSpeed, 20, { duration: 0.6 });
+              animate(maskLevel, 0, { duration: 0.9 });
+            }}
+            onMouseLeave={() => {
+              animate(bgSpeed, 1, { duration: 0.5 });
+              animate(maskLevel, 0.8, { duration: 0.5 });
+            }}
+          />
+        </Link>
       </div>
 
        {/* grayscale overlay with color spotlight */}
@@ -151,7 +124,8 @@ export default function Home() {
            WebkitMaskPosition: 'center',
            maskRepeat: 'no-repeat',
            WebkitMaskRepeat: 'no-repeat',
-           transition: 'mask-position 0.3s ease-out, -webkit-mask-position 0.3s ease-out'
+           transition: 'mask-position 0.3s ease-out, -webkit-mask-position 0.3s ease-out',
+           maskImage
          }}
        />
      </div>
