@@ -23,16 +23,6 @@ export default function Home() {
    const progress = useMotionValue(0);
    const smooth = useSpring(progress, { stiffness: 60, damping: 25 });
 
-   const welcomeOpacity = useTransform(smooth, [0, 0.3, 0.6], [1, 1, 0]);
-   const welcomeY = useTransform(smooth, [0, 0.6], [0, -120]);
-   const welcomeScale = useTransform(smooth, [0, 0.6], [1, 0.85]);
-
-   const profileOpacity = useTransform(smooth, [0.4, 0.6], [0, 1]);
-   const profileY = useTransform(smooth, [0.4, 0.6], [80, 0]);
-
-   const contentOpacity = useTransform(smooth, [0.5, 0.7], [0, 1]);
-   const contentY = useTransform(smooth, [0.5, 0.7], [80, 0]);
-
    const buttonOpacity = useTransform(smooth, [0.95, 1], [0, 1]);
    const buttonY = useTransform(smooth, [0.95, 1], [80, 0]);
 
@@ -99,94 +89,50 @@ export default function Home() {
      >
       {background}
 
-       {/* Welcome */}
-       <motion.div
-         style={{
-           position: 'absolute', top: '40%', left: '50%',
-           opacity: welcomeOpacity, y: welcomeY, scale: welcomeScale,
-           zIndex: 2, textAlign: 'center'
-         }}
-       >
-         <motion.h1
-           className={homeStyles.rippleText}
-           initial={{ opacity: 0, y: 60, scale: 0.85 }}
-           animate={{ opacity: 1, y: 0, scale: 1 }}
-           transition={{ delay: 0.2, duration: 1.2, ease: [0.25, 1, 0.5, 1] }}
-           style={{ fontFamily: 'Great Vibes', fontSize: '4rem', textAlign: 'center', padding: '0 1rem' }}
-         >
-           Welcome to My Portfolio
-         </motion.h1>
-       </motion.div>
-
-       {/* Profile & Social Section */}
-       <div style={{ position: 'absolute', top: '20%', left: '10%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-         <motion.div style={{ opacity: imageOpacity, y: imageY, zIndex: 2 }}>
-           <img
-             src={profile.avatar_url}
-             alt="Profile"
-             style={{ width: 350, height: 400, objectFit: 'cover', borderRadius: '20px', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)' }}
-           />
-         </motion.div>
-         <motion.div style={{ display: 'flex', gap: '1rem', marginTop: '2rem', opacity: socialOpacity, y: socialY, zIndex: 2 }}>
-           {profile.twitter && <a href={profile.twitter} target="_blank" rel="noopener noreferrer" className={styles.socialMediaIcon}><FaTwitter size={30} /></a>}
-           {profile.linkedin && <a href={profile.linkedin} target="_blank" rel="noopener noreferrer" className={styles.socialMediaIcon}><FaLinkedin size={30} /></a>}
-           {profile.instagram && <a href={profile.instagram} target="_blank" rel="noopener noreferrer" className={styles.socialMediaIcon}><FaInstagram size={30} /></a>}
-         </motion.div>
-       </div>
-
-       {/* Name & Bio */}
-       <div style={{ position: 'absolute', top: '20%', right: '20%', maxWidth: '40%' }}>
-         <motion.h2 style={{
-             fontFamily: 'Great Vibes, cursive',
-             fontSize: '2.2rem',
-             margin: 0,
-             background: 'linear-gradient(90deg, #6ec1ff, #ff9ce6)',
-             backgroundClip: 'text',
-             WebkitBackgroundClip: 'text',
-             color: 'transparent',
-             opacity: nameOpacity,
-             y: nameY,
-             zIndex: 2
-         }}>
-           {profile.first_name} {profile.last_name}
-         </motion.h2>
-         <motion.p style={{ color: '#fafafa', fontSize: '1.1rem', marginTop: '0.5rem', whiteSpace: 'pre-wrap', opacity: bioOpacity, y: bioY, zIndex: 2 }}>
-           {profile.bio}
-         </motion.p>
-       </div>
-
-       {/* View Artworks Button */}
-       <div
-         style={{
-           position: 'absolute', bottom: '10%', left: '50%',
-           transform: 'translateX(-50%)',
-           zIndex: 2
-         }}
-       >
-         <a
-           onMouseEnter={() => {
-             animate(bgSpeed, 20, { duration: 0.5 });
-             animate(maskLevel, 0, { duration: 0.5 });
-           }}
-           onMouseLeave={() => {
-             animate(bgSpeed, 1, { duration: 0.5 });
-             animate(maskLevel, 0.8, { duration: 0.5 });
-           }}
-           href="/artworks"
-           style={{
-             background: 'none',
-             border: 'none',
-             padding: 0,
-             color: '#fafafa',
-             fontSize: '2rem',
-             cursor: 'pointer',
-             textDecoration: 'none',
-             letterSpacing: '1px'
-           }}
-         >
-           View My Artworks
-         </a>
-       </div>
+      {/* Centered Logo and Button */}
+      <div
+        style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -60%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          zIndex: 2
+        }}
+      >
+        <img
+          src="/logo.svg"
+          alt="Logo"
+          style={{ width: 340, height: 340, marginBottom: '2.5rem', userSelect: 'none' }}
+          draggable={false}
+        />
+        <a
+          onMouseEnter={() => {
+            animate(bgSpeed, 20, { duration: 0.6 });
+            animate(maskLevel, 0, { duration: 0.9 });
+          }}
+          onMouseLeave={() => {
+            animate(bgSpeed, 1, { duration: 0.5 });
+            animate(maskLevel, 0.8, { duration: 0.5 });
+          }}
+          href="/artworks"
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: 0,
+            color: '#fafafa',
+            fontSize: '2rem',
+            cursor: 'pointer',
+            textDecoration: 'none',
+            letterSpacing: '1px',
+            marginTop: 0
+          }}
+        >
+          View My Artworks
+        </a>
+      </div>
 
        {/* grayscale overlay with color spotlight */}
        <motion.div
