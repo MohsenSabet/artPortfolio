@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { motion, useMotionValue, useTransform, useSpring, animate } from 'framer-motion';
+import { bgSpeed } from '@/lib/bgSpeed';
 import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabaseClient';
 import { FaTwitter, FaLinkedin, FaInstagram } from 'react-icons/fa';
@@ -12,6 +13,11 @@ const ThreeBackground = dynamic(() => import('@/components/ThreeBackground'), { 
 export default function Home() {
    const [profile, setProfile] = useState(null);
    const [loading, setLoading] = useState(true);
+   // memoize background to avoid re-mounts
+   const background = useMemo(() => <ThreeBackground />, []);
+   // mask grayscale level: 0.8 => 80%, 0 => 0%
+   const maskLevel = useMotionValue(0.99);
+   const maskFilter = useTransform(maskLevel, g => `grayscale(${g * 100}%)`);
 
    // Scroll-driven animation hooks
    const progress = useMotionValue(0);
@@ -46,6 +52,26 @@ export default function Home() {
      const delta = e.deltaY * 0.0006;
      progress.set(Math.min(Math.max(progress.get() + delta, 0), 1));
    };
+  
+   // Mouse-driven spotlight with framer-motion spring smoothing
+   const mouseX = useMotionValue(0);
+   const mouseY = useMotionValue(0);
+   // set initial center position on client only
+   useEffect(() => {
+     if (typeof window !== 'undefined') {
+       mouseX.set(window.innerWidth / 2);
+       mouseY.set(window.innerHeight / 2);
+     }
+   }, []);
+   const smoothX = useSpring(mouseX, { stiffness: 50, damping: 15 });
+   const smoothY = useSpring(mouseY, { stiffness: 50, damping: 15 });
+   const maskStyle = useTransform([smoothX, smoothY], ([x, y]) =>
+     `radial-gradient(circle 200px at ${x}px ${y}px, transparent 0%, transparent 140px, rgba(0,0,0,0.5) 200px, black 260px)`
+   );
+   const onMouseMove = (e) => {
+     mouseX.set(e.clientX);
+     mouseY.set(e.clientY);
+   };
 
    // Load profile
    useEffect(() => {
@@ -68,14 +94,15 @@ export default function Home() {
      <div
        ref={containerRef}
        onWheel={onWheel}
+       onMouseMove={onMouseMove}
        style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}
      >
-       <ThreeBackground />
+      {background}
 
        {/* Welcome */}
        <motion.div
          style={{
-           position: 'absolute', top: '40%', left: '50%', x: '-50%',
+           position: 'absolute', top: '40%', left: '50%',
            opacity: welcomeOpacity, y: welcomeY, scale: welcomeScale,
            zIndex: 2, textAlign: 'center'
          }}
@@ -129,19 +156,23 @@ export default function Home() {
        </div>
 
        {/* View Artworks Button */}
-       <motion.div
+       <div
          style={{
-           position: 'absolute', bottom: '10%', left: '50%', x: '-50%',
-           opacity: buttonOpacity, y: buttonY, zIndex: 2
+           position: 'absolute', bottom: '10%', left: '50%',
+           transform: 'translateX(-50%)',
+           zIndex: 2
          }}
        >
-         <motion.a
-           onClick={() => (window.location.href = '/artworks')}
-           initial={{ opacity: 0, y: 20 }}
-           animate={{ opacity: 1, y: 0 }}
-           transition={{ delay: 0.1, duration: 1 }}
-           whileHover={{ scale: 1.05, textShadow: '0 0 12px rgba(250,250,250,0.8)' }}
-           whileTap={{ scale: 0.95 }}
+         <a
+           onMouseEnter={() => {
+             animate(bgSpeed, 20, { duration: 0.5 });
+             animate(maskLevel, 0, { duration: 0.5 });
+           }}
+           onMouseLeave={() => {
+             animate(bgSpeed, 1, { duration: 0.5 });
+             animate(maskLevel, 0.8, { duration: 0.5 });
+           }}
+           href="/artworks"
            style={{
              background: 'none',
              border: 'none',
@@ -154,8 +185,25 @@ export default function Home() {
            }}
          >
            View My Artworks
-         </motion.a>
-       </motion.div>
+         </a>
+       </div>
+
+       {/* grayscale overlay with color spotlight */}
+       <motion.div
+         style={{
+           position: 'fixed', top: 0, left: 0,
+           width: '100%', height: '100%',
+           pointerEvents: 'none',
+           backdropFilter: maskFilter,
+           maskImage: maskStyle,
+           WebkitMaskImage: maskStyle,
+           maskPosition: 'center',
+           WebkitMaskPosition: 'center',
+           maskRepeat: 'no-repeat',
+           WebkitMaskRepeat: 'no-repeat',
+           transition: 'mask-position 0.3s ease-out, -webkit-mask-position 0.3s ease-out'
+         }}
+       />
      </div>
    );
 }

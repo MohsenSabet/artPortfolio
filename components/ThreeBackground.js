@@ -1,20 +1,22 @@
 "use client";
 
 // src/components/ThreeBackground.js
-import React, { useRef, useLayoutEffect } from 'react'
+import React, { useRef, useLayoutEffect, memo } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { Cloud } from '@react-three/drei'
+import { bgSpeed } from '@/lib/bgSpeed'
 
 // —————— vertex ——————
-const vertexShader = /* glsl */`
+const vertexShader = /* glsl */ `
   void main() {
     gl_Position = vec4( position, 1.0 );
   }
-`
+`;
+
 
 // —————— fragment (original colour version) ——————
-const fragmentShader = /* glsl */`
+const fragmentShader = /* glsl */ `
   uniform vec2 u_resolution;
   uniform float u_time;
 
@@ -67,9 +69,9 @@ const fragmentShader = /* glsl */`
   void main() {
     vec2 uv = (gl_FragCoord.xy - 0.5*u_resolution.xy) / u_resolution.y;
     float time = u_time / 20.0;
-    mat2 rot = mat2(cos(time), sin(time),
-                    -sin(time), cos(time));
-    uv = rot * uv * (1.4 + sin(time)*0.3) - vec2(time, 0.0);
+    // Just scale UVs slightly, no rotation or translation
+    uv = uv * 1.4;
+
 
     vec2 q = vec2(0.0), r = vec2(0.0);
     float v = pattern(uv, seed, time, q, r);
@@ -87,61 +89,61 @@ const fragmentShader = /* glsl */`
 
     gl_FragColor = vec4(colour + abs(colour)*0.5, 1.0);
   }
-`
+`;
+
 
 function ShaderBackground() {
-  const mat = useRef()
-  const { size, invalidate, camera } = useThree()
-  
-  // set initial resolution and camera aspect on mount/resize, then force render
-  useLayoutEffect(() => {
-    if (!mat.current) return
-    mat.current.uniforms.u_resolution.value.set(size.width, size.height)
-    camera.aspect = size.width / size.height
-    camera.updateProjectionMatrix()
-    invalidate()
-  }, [size, camera, invalidate])
-  
-  // update time every frame
-  useFrame((state) => {
-    if (!mat.current) return
-    mat.current.uniforms.u_time.value = state.clock.getElapsedTime()
-  })
+   const mat = useRef()
+   const { size, invalidate, camera } = useThree()
+   
+   // set initial resolution and camera aspect on mount/resize, then force render
+   useLayoutEffect(() => {
+     if (!mat.current) return
+     mat.current.uniforms.u_resolution.value.set(size.width, size.height)
+     camera.aspect = size.width / size.height
+     camera.updateProjectionMatrix()
+     invalidate()
+   }, [size, camera, invalidate])
+   
+   // update time every frame, accumulating speed multiplier
+   useFrame((state, delta) => {
+     if (!mat.current) return
+     // accumulate custom time scaled by bgSpeed
+     mat.current.uniforms.u_time.value += delta * bgSpeed.get()
+   })
 
-  return (
-    <mesh>
-      <planeGeometry args={[2, 2]} />
-      <shaderMaterial
-        ref={mat}
-        uniforms={{
-          u_time:       { value: 0 },
-          u_resolution: { value: new THREE.Vector2(size.width, size.height) }
-        }}
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-      />
-    </mesh>
-  )
+   return (
+     <mesh rotation={[0, 0, 0]} frustumCulled={false}>
+       <planeGeometry args={[2, 2]} />
+       <shaderMaterial
+         ref={mat}
+         uniforms={{
+           u_time:       { value: 0 },
+           u_resolution: { value: new THREE.Vector2(size.width, size.height) }
+         }}
+         vertexShader={vertexShader}
+         fragmentShader={fragmentShader}
+       />
+     </mesh>
+   )
 }
 
-export default function ThreeBackground() {
-  return (
-    <Canvas
-      frameloop="always"
-      onCreated={({ gl }) => { gl.domElement.style.touchAction = 'none' }}
-      style={{
-        position: 'fixed',
-        top: 0, left: 0,
-        width: '100%', height: '100%',
-        pointerEvents: 'none',
-        touchAction: 'none',
-        zIndex: -1
-      }}
-      gl={{ antialias: true }}
-      camera={{ position: [0, 0, 1], fov: 75 }}
-    >
+function ThreeBackground() {
+    return (
+      <Canvas
+         frameloop="always"
+         onCreated={({ gl }) => { gl.domElement.style.touchAction = 'none' }}
+         style={{
+         position: 'fixed', top: 0, left: 0,
+         width: '100%', height: '100%',
+         pointerEvents: 'none', touchAction: 'none',
+         zIndex: -1
+         }}
+       gl={{ antialias: true }}
+         camera={{ position: [0, 0, 1], fov: 75 }}
+       >
       <ShaderBackground />
-      {/* nebula clouds for depth and atmosphere */}
+        {/* nebula clouds for depth and atmosphere */}
       <Cloud
         position={[0, 0, -5]}
         opacity={0.4}
@@ -154,4 +156,6 @@ export default function ThreeBackground() {
     </Canvas>
   )
 }
+// memoize canvas to avoid re-rendering/flipping
+export default memo(ThreeBackground)
 
