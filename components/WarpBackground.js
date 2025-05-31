@@ -33,24 +33,23 @@ void main(){
   vec2 C = gl_FragCoord.xy;
   float T = uTime;
   vec4 o = vec4(0.), q, p, U = vec4(2.,1.,0.,3.);
-  float i=0., d=0., z=0., s=0.;
+  float d = 0., z = 0., s = 0.;
   vec2 r = uResolution.xy;
-  for(i=0.; i<79.; i+=1.0){
-    // advance ray distance per step
+  for(float i = 0.; i < 79.; i += 1.0) {
     z += d + 5e-4;
-    q = vec4(normalize(vec3(C-.5*r, r.y))*z, .2);
-    q.z += T/3e1;
+    q = vec4(normalize(vec3(C - .5 * r, r.y)) * z, .2);
+    q.z += T / 30.0;
     s = q.y + .1;
     q.y = abs(s);
     p = q;
     p.y -= .11;
-    p.xy *= mat2(cos(11.*U.zywz - 2.*p.z));
+    p.xy *= mat2(cos(11. * U.zywz - 2. * p.z));
     p.y -= .2;
-    d = abs(g(p,8.) - g(p,24.))/4.;
-    p = 1. + cos(.7*U + 5.*q.z);
-    o += (s>0.?1.:.1)*p.w*p/max(s>0.?d:d*d*d,5e-4);
+    d = abs(g(p, 8.) - g(p, 24.)) / 4.;
+    p = 1. + cos(.7 * U + 5. * q.z);
+    o += (s > 0. ? 1. : .1) * p.w * p / max(s > 0. ? d : d * d * d, 5e-4);
   }
-  o += (1.4+sin(T)*sin(1.7*T)*sin(2.3*T))*1e3*U/length(q.xy);
+  o += (1.4 + sin(T) * sin(1.7 * T) * sin(2.3 * T)) * 1e3 * U / length(q.xy);
   vec4 O = tanh4(o / 1e5);
   gl_FragColor = O;
 }
@@ -93,8 +92,18 @@ export default function WarpBackground() {
   return (
     <Canvas
       frameloop="always"
-      style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: -1 }}
-      onCreated={({ gl }) => { gl.domElement.style.touchAction = 'none'; }}
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+        zIndex: -1
+      }}
+      onCreated={({ gl }) => {
+        gl.domElement.style.touchAction = 'none';
+      }}
       gl={{ antialias: true }}
       camera={{ position: [0, 0, 1], fov: 75 }}
     >

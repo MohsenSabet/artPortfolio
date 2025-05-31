@@ -7,94 +7,132 @@ import * as THREE from 'three';
 // Vertex shader for full-screen quad
 const vertSrc = /* glsl */`
   varying vec2 vUv;
-
   void main() {
     vUv = uv;
     gl_Position = vec4(position, 1.0);
   }
 `;
 
-// Fragment shader implementing the ray-marched tunnel
+// Fragment shader: ultra-slow, whimsical fractal galaxy with bright stars
 const fragSrc = /* glsl */`
-  precision highp float;
-  uniform float uTime;
-  uniform vec2 uResolution;
+precision highp float;
+varying vec2 vUv;
+uniform float uTime;
+uniform vec2 uResolution;
 
-  // Gyroid distance-field helper
-  float g(vec4 p, float s) {
-    return abs(dot(sin(p *= s), cos(p.zxwy)) - 1.0) / s;
-  }
-
-  // Custom tanh for floats
-  float tanh_f(float x) {
-    float e2x = exp(2.0 * x);
-    return (e2x - 1.0) / (e2x + 1.0);
-  }
-
-  void main() {
-    vec2 C = gl_FragCoord.xy;
-    float T = uTime;
-    vec4 o = vec4(0.0), q;
-    float d = 0.0, z = 0.0;
-    vec4 U = vec4(2.0, 1.0, 0.0, 3.0);
-
-    vec2 uv = (C - 0.5 * uResolution) / min(uResolution.x, uResolution.y);
-
-    // Raymarch loop
-    for (float i = 0.0; i < 79.0; i++) {
-      z += d + 5e-4;
-      q = vec4(normalize(vec3(uv, 2.0)) * z, 0.2);
-      q.z += T / 30.0;
-      float s = q.y + 0.1;
-      q.y = abs(s);
-      vec4 p = q;
-      p.y -= 0.11;
-      p.xy *= mat2(cos(11.0 * U.zywz - 2.0 * p.z));
-      p.y -= 0.2;
-      d = abs(g(p, 8.0) - g(p, 24.0)) / 4.0;
-      vec4 col = 1.4 + 1.8 * cos(vec4(1.8, 3.1, 4.5, 0.0) + 7.0 * q.z);
-      o += (s > 0.0 ? 1.0 : 0.1) * col.w * col / max(s > 0.0 ? d : d * d * d, 5e-4);
+// fractal field with very slow time scaling
+float field(in vec3 p, float s) {
+    float strength = 7. + .03 * log(1e-6 + fract(sin(uTime * 0.01) * 4373.11));
+    float accum = s / 4.;
+    float prev = 0.;
+    float tw = 0.;
+    for (int i = 0; i < 26; ++i) {
+        float mag = dot(p, p);
+        p = abs(p) / mag + vec3(-.5, -.4, -1.5);
+        float w = exp(-float(i) / 7.);
+        accum += w * exp(-strength * pow(abs(mag - prev), 2.2));
+        tw += w;
+        prev = mag;
     }
+    return max(0., 5. * accum / tw - .7);
+}
 
-    // Animated tunnel wisp
-    vec2 wispPos = 1.5 * vec2(cos(T * 0.7), sin(T * 0.9));
-    float wispDist = length(q.xy - wispPos);
-    vec3 wispColor = vec3(1.0, 0.8 + 0.2 * sin(T), 0.7 + 0.3 * cos(T * 1.3));
-    o.xyz += (2.0 + sin(T * 2.0)) * 800.0 * wispColor / (wispDist + 0.4);
+// fewer iterations for second layer, same slow scale
+float field2(in vec3 p, float s) {
+    float strength = 7. + .03 * log(1e-6 + fract(sin(uTime * 0.01) * 4373.11));
+    float accum = s / 4.;
+    float prev = 0.;
+    float tw = 0.;
+    for (int i = 0; i < 18; ++i) {
+        float mag = dot(p, p);
+        p = abs(p) / mag + vec3(-.5, -.4, -1.5);
+        float w = exp(-float(i) / 7.);
+        accum += w * exp(-strength * pow(abs(mag - prev), 2.2));
+        tw += w;
+        prev = mag;
+    }
+    return max(0., 5. * accum / tw - .7);
+}
 
-    // Tone mapping
-    vec3 c3 = o.xyz / 1e5;
-    c3.r = tanh_f(c3.r);
-    c3.g = tanh_f(c3.g);
-    c3.b = tanh_f(c3.b);
-    gl_FragColor = vec4(c3, 1.0);
-  }
+// random seed → vec3
+vec3 nrand3(vec2 co) {
+    vec3 a = fract(cos(co.x * 8.3e-3 + co.y) * vec3(1.3e5, 4.7e5, 2.9e5));
+    vec3 b = fract(sin(co.x * 0.3e-3 + co.y) * vec3(8.1e5, 1.0e5, 0.1e5));
+    return mix(a, b, 0.5);
+}
+
+void main() {
+    vec2 fragCoord = vUv * uResolution;
+    // apply ultra-slow rotation to UV
+    float angle = uTime * 0.001;
+    mat2 rot = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+    vec2 uv = rot * (2. * fragCoord / uResolution - 1.);
+    vec2 uvs = uv * uResolution / max(uResolution.x, uResolution.y);
+
+    // base position
+    vec3 p = vec3(uvs / 4., 0.) + vec3(1., -1.3, 0.);
+    p += 0.2 * vec3(sin(uTime / 60.), sin(uTime / 50.), sin(uTime / 512.));
+
+    // audio freqs faked as 1.0
+    float f0 = 1.0;
+    float f1 = 1.0;
+    float f2 = 1.0;
+    float f3 = 1.0;
+
+    float t = field(p, f2);
+    float v = (1.0 - exp((abs(uv.x) - 1.0) * 6.0)) * (1.0 - exp((abs(uv.y) - 1.0) * 6.0));
+
+    // second layer
+    vec3 p2 = vec3(
+        uvs / (4.0 + sin(uTime * 0.02) * 0.08 + 0.2 + sin(uTime * 0.03) * 0.08 + 0.4),
+        1.5
+    ) + vec3(2.0, -1.3, -1.0);
+    p2 += 0.25 * vec3(sin(uTime / 60.), sin(uTime / 50.), sin(uTime / 512.));
+    float t2 = field2(p2, f3);
+    vec4 c2 = mix(0.2, 1.0, v) * vec4(1.3 * t2 * t2 * t2, 1.8 * t2 * t2, t2 * f0, t2);
+
+    // stars
+    vec2 seed = floor(p.xy * uResolution.x * 2.0);
+    vec2 seed2 = floor(p2.xy * uResolution.x * 2.0);
+    vec3 rnd = nrand3(seed);
+    vec3 rnd2 = nrand3(seed2);
+    vec4 star = (vec4(pow(rnd.y, 50.0)) + vec4(pow(rnd2.y, 50.0))) * 2.5;
+    star.a = 1.0;
+
+    // combine fractal and stars
+    vec4 galaxy = mix(f3 - 0.5, 1.0, v)
+                  * vec4(1.2 * f2 * t * t * t, 1.1 * f1 * t * t, 0.8 * f3 * t, 1.0)
+                  + c2 + star;
+
+    // deep background tint
+    vec3 darkTint = vec3(0.002, 0.0, 0.03);
+    galaxy.rgb = mix(darkTint, galaxy.rgb, 0.2);
+
+    gl_FragColor = galaxy;
+}
 `;
 
-function TunnelBackground() {
-  const material = useRef();
-  const { size, invalidate, camera } = useThree();
+function WarpMesh() {
+  const mat = useRef();
+  const { size, camera, invalidate } = useThree();
 
-  // Update resolution and camera on resize
   useLayoutEffect(() => {
-    if (!material.current) return;
-    material.current.uniforms.uResolution.value.set(size.width, size.height);
+    if (!mat.current) return;
+    mat.current.uniforms.uResolution.value.set(size.width, size.height);
     camera.aspect = size.width / size.height;
     camera.updateProjectionMatrix();
     invalidate();
   }, [size, camera, invalidate]);
 
-  // Animate time uniform each frame
   useFrame(({ clock }) => {
-    if (!material.current) return;
-    material.current.uniforms.uTime.value = clock.getElapsedTime();
+    if (mat.current) mat.current.uniforms.uTime.value = clock.getElapsedTime();
   });
 
   return (
     <mesh>
       <planeGeometry args={[2, 2]} />
       <shaderMaterial
-        ref={material}
+        ref={mat}
         vertexShader={vertSrc}
         fragmentShader={fragSrc}
         uniforms={{
@@ -106,21 +144,16 @@ function TunnelBackground() {
   );
 }
 
-// Standalone canvas for just the tunnel background
-export default function ThreeBackground() {
+export default function TunnelBackground() {
   return (
     <Canvas
       frameloop="always"
-      style={{
-        position: 'fixed', top: 0, left: 0,
-        width: '100%', height: '100%',
-        pointerEvents: 'none', zIndex: -1
-      }}
+      style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: -1 }}
       onCreated={({ gl }) => { gl.domElement.style.touchAction = 'none'; }}
       gl={{ antialias: true }}
       camera={{ position: [0, 0, 1], fov: 75 }}
     >
-      <TunnelBackground />
+      <WarpMesh />
     </Canvas>
   );
 }

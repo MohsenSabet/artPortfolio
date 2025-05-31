@@ -1,0 +1,81 @@
+.imageStackContainer {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  /* let container size itself to images */
+  width: auto;
+  height: auto;
+  overflow: visible;
+  z-index: 999;
+  pointer-events: none; /* let clicks through */
+}
+
+.stackImage {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  /* images render at natural dimensions */
+  width: 500px;
+  height: auto;
+  pointer-events: none;
+  transform-origin: bottom right;
+  z-index: 2;
+}
+
+.stackImage:first-child {
+  /* stronger fade-out: central opacity until 50%, fade to transparent at edges */
+  mask-image: radial-gradient(circle at center, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+  mask-size: 100% 100%;
+  mask-repeat: no-repeat;
+  -webkit-mask-image: radial-gradient(circle at center, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%);
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+}
+
+.starCanvas {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 600px;
+  height: 600px;
+  pointer-events: none;
+  z-index: 998;
+}
+
+@keyframes heartbeatGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 5px #00f) drop-shadow(0 0 10px #8000ff);
+  }
+  50% {
+    filter: drop-shadow(0 0 20px #00f) drop-shadow(0 0 30px #8000ff);
+  }
+}
+
+.heartbeat {
+  /* pure glow pulse on hover */
+  will-change: filter;
+  pointer-events: auto;
+}
+
+.heartbeat:hover {
+  animation: heartbeatGlow 4s ease-in-out infinite;
+}
+
+@keyframes heartbeatGlow5 {
+  0%, 100% {
+    filter: drop-shadow(0 0 5px #ffa500) drop-shadow(0 0 10px #00ff00);
+  }
+  50% {
+    filter: drop-shadow(0 0 20px #ffa500) drop-shadow(0 0 30px #00ff00);
+  }
+}
+
+.heartbeat5 {
+  /* distinct pulse glow on hover */
+  will-change: filter;
+  pointer-events: auto;
+}
+
+.heartbeat5:hover {
+  animation: heartbeatGlow5 5s ease-in-out infinite;
+}
