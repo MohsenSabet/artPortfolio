@@ -185,7 +185,7 @@ export default function DashboardHome() {
             <Card.Body>
               <Card.Title>@{profile?.username}</Card.Title>
               <Card.Text>{profile?.first_name} {profile?.last_name}</Card.Text>
-              <Link href="/dashboard/profile" passHref>
+              <Link href="/dashboard/editProfile" passHref>
                 <Button variant="primary" className="w-100">Edit Profile</Button>
               </Link>
             </Card.Body>

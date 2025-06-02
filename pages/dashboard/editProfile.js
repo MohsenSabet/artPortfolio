@@ -11,6 +11,7 @@ export default function EditProfile() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [profilePic, setProfilePic] = useState('');
+  const [initialAvatarPath, setInitialAvatarPath] = useState(null);
   const [profileFile, setProfileFile] = useState(null);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -59,6 +60,11 @@ export default function EditProfile() {
         setPhone(data.phone || '');
         setBio(data.bio || '');
         setProfilePic(data.avatar_url || 'https://via.placeholder.com/200');
+        // store initial avatar storage path for deletion later
+        if (data.avatar_url && data.avatar_url.includes('/avatars/')) {
+          const path = data.avatar_url.split('/avatars/')[1];
+          setInitialAvatarPath(path);
+        }
         setTwitter(data.twitter || '');
         setLinkedIn(data.linkedin || '');
         setInstagram(data.instagram || '');
@@ -99,6 +105,11 @@ export default function EditProfile() {
           setError(storageError.message);
         }
         return;
+      }
+      // remove old avatar from storage
+      if (initialAvatarPath) {
+        const { error: removeError } = await supabase.storage.from('avatars').remove([initialAvatarPath]);
+        if (removeError) console.error('Error removing old avatar:', removeError.message);
       }
       const { data: { publicUrl } } = supabase
         .storage
@@ -177,8 +188,8 @@ export default function EditProfile() {
         <Card.Header as="h4" className="d-flex justify-content-between align-items-center">
           Edit Profile
         </Card.Header>
-        <Card.Body>
-          <Form onSubmit={handleSubmit}>
+        <Form onSubmit={handleSubmit}>
+          <Card.Body>
             <Form.Group controlId="profilePic" className="mb-3 text-center">
               <Form.Label>Profile Picture</Form.Label>
               <div className="mb-2">
@@ -334,44 +345,43 @@ export default function EditProfile() {
              {/* Change password trigger */}
              <Button variant="warning" onClick={() => setShowPwModal(true)}>Change Password</Button>
             </div>
+          </Card.Body>
+           <Card.Footer className="d-flex justify-content-between">
+             {/* Cancel edits */}
+             <Link href="/dashboard/profile" passHref>
+               <Button variant="outline-secondary">Cancel</Button>
+             </Link>
+             <Button variant="success" type="submit">Save Changes</Button>
+           </Card.Footer>
           </Form>
-        </Card.Body>
-        {/* Footer with Change Password button */}
-        <Card.Footer className="d-flex justify-content-between">
-          {/* Cancel edits */}
-          <Link href="/dashboard/profile" passHref>
-            <Button variant="outline-secondary">Cancel</Button>
-          </Link>
-           <Button variant="success" type="submit">Save Changes</Button>
-        </Card.Footer>
-      </Card>
+         </Card>
 
-      {/* Password Change Modal */}
-      <Modal show={showPwModal} onHide={() => setShowPwModal(false)} backdrop="static" centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Change Password</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {pwError && <Alert variant="danger">{pwError}</Alert>}
-          {pwSuccess && <Alert variant="success">Password updated!</Alert>}
-          <Form>
-            <Form.Group controlId="newPassword" className="mb-3">
-              <Form.Label>New Password</Form.Label>
-              <Form.Control type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
-            </Form.Group>
-            <Form.Group controlId="confirmPassword" className="mb-3">
-              <Form.Label>Confirm Password</Form.Label>
-              <Form.Control type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowPwModal(false)}>Close</Button>
-          <Button variant="primary" onClick={() => { setPwError(null); setPwSuccess(false); handlePasswordChange(); }}>
-            Update Password
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </Container>
+        {/* Password Change Modal */}
+        <Modal show={showPwModal} onHide={() => setShowPwModal(false)} backdrop="static" centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Change Password</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {pwError && <Alert variant="danger">{pwError}</Alert>}
+            {pwSuccess && <Alert variant="success">Password updated!</Alert>}
+            <Form>
+              <Form.Group controlId="newPassword" className="mb-3">
+                <Form.Label>New Password</Form.Label>
+                <Form.Control type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
+              </Form.Group>
+              <Form.Group controlId="confirmPassword" className="mb-3">
+                <Form.Label>Confirm Password</Form.Label>
+                <Form.Control type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowPwModal(false)}>Close</Button>
+            <Button variant="primary" onClick={() => { setPwError(null); setPwSuccess(false); handlePasswordChange(); }}>
+              Update Password
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </Container>
   );
 }
