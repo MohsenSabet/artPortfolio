@@ -1,3 +1,5 @@
+/* styles/About.module.css */
+
 .imageStackContainer {
   position: fixed;
   bottom: 0;
@@ -20,6 +22,13 @@
   pointer-events: none;
   transform-origin: bottom right;
   z-index: 2;
+
+  /*
+    —— Changed transition to 5s here —— 
+    So that whenever filter/transform return to none after hover, 
+    it eases out over 5 seconds instead of snapping.
+  */
+  transition: filter 5s ease-in-out, transform 5s ease-in-out;
 }
 
 .stackImage:first-child {
@@ -50,7 +59,7 @@
   z-index: 998;
 }
 
-/* Base “heartbeat” / animation classes (no :hover here) */
+/* ── Base “heartbeat” / animation classes ── */
 .heartbeat3,
 .heartbeat5,
 .heartbeat6,
@@ -58,128 +67,150 @@
 .flight9 {
   will-change: filter, transform;
   pointer-events: auto; /* Allow hover events */
+
+  /*
+    —— No transition here. 
+    The 5s transition is on .stackImage above, which applies to all layers. 
+  */
+}
+
+/* 1) Ensure layer 3’s transform-origin is at the bottom center */
+.heartbeat3 {
+  transform-origin: bottom center;
+}
+
+/* 2) Ensure layer 11’s transform-origin is at the bottom center */
+.heartbeat11 {
+  transform-origin: bottom center;
 }
 
 /* When hovering anywhere over the container, trigger each animation */
 .imageStackContainer:hover .heartbeat3 {
-  /* layer 3: “magical” turquoise→purple glow, slow and organic */
-  animation: whimsicalGlow3 6.2s ease-in-out infinite;
+  /* layer 3: run both subtle whimsical glow and breathing in parallel */
+  animation:
+    whimsicalGlow3  6.2s ease-in-out infinite,
+    breathing3      4s   ease-in-out infinite 0.2s;
 }
 
 .imageStackContainer:hover .heartbeat5 {
-  /* layer 5: pollination-style glow (orange→pale green) */
+  /* layer 5: subtle pollination-style glow */
   animation: pollingGlow5 7s ease-in-out infinite 0.3s;
 }
 
 .imageStackContainer:hover .heartbeat6 {
-  /* layer 6: flower-inspired pink/orange-purple glow */
+  /* layer 6: subtle floral-inspired glow */
   animation: floralGlow6 6.5s ease-in-out infinite 0.4s;
 }
 
 .imageStackContainer:hover .flight9 {
-  /* layer 9: hummingbird flight path (move → pause → move → pause ...) */
+  /* layer 9: hummingbird flight path (continuous, graceful) */
   animation: flightPath9 6s ease-in-out infinite 0.2s;
 }
 
 .imageStackContainer:hover .heartbeat11 {
-  /* layer 11: slowest, subtle cyan→lime fade */
-  animation: heartbeatGlow11 6.5s ease-in-out infinite 0.8s;
+  /* layer 11: run both subtle glow and breathing in parallel */
+  animation:
+    heartbeatGlow11 6.5s ease-in-out infinite 0.8s,
+    breathing11      4s   ease-in-out infinite 0.8s;
 }
 
 /* ──────────────────────────────────────────────────────── */
-/* Layer 3’s “whimsical” keyframes */
+/* Layer 3’s “subtle whimsical” glow keyframes */
 @keyframes whimsicalGlow3 {
   0% {
     filter:
-      drop-shadow(0 0 4px rgba(100, 230, 255, 0.4))
-      drop-shadow(0 0 8px rgba(180, 150, 255, 0.2));
+      drop-shadow(0 0 3px rgba(100, 230, 255, 0.2))
+      drop-shadow(0 0 5px rgba(180, 150, 255, 0.15));
   }
   25% {
     filter:
-      drop-shadow(0 0 12px rgba(120, 200, 255, 0.6))
-      drop-shadow(0 0 16px rgba(200, 130, 255, 0.4));
+      drop-shadow(0 0 6px rgba(120, 200, 255, 0.3))
+      drop-shadow(0 0 8px rgba(200, 130, 255, 0.2));
   }
   50% {
     filter:
-      drop-shadow(0 0 8px rgba(150, 255, 220, 0.5))
-      drop-shadow(0 0 14px rgba(180, 180, 255, 0.5));
+      drop-shadow(0 0 5px rgba(150, 255, 220, 0.25))
+      drop-shadow(0 0 7px rgba(180, 180, 255, 0.25));
   }
   75% {
     filter:
-      drop-shadow(0 0 10px rgba(120, 200, 255, 0.5))
-      drop-shadow(0 0 14px rgba(200, 150, 255, 0.3));
+      drop-shadow(0 0 6px rgba(120, 200, 255, 0.25))
+      drop-shadow(0 0 7px rgba(200, 150, 255, 0.15));
   }
   100% {
     filter:
-      drop-shadow(0 0 4px rgba(100, 230, 255, 0.4))
-      drop-shadow(0 0 8px rgba(180, 150, 255, 0.2));
+      drop-shadow(0 0 3px rgba(100, 230, 255, 0.2))
+      drop-shadow(0 0 5px rgba(180, 150, 255, 0.15));
+  }
+}
+
+/* Layer 3’s “breathing” keyframes */
+@keyframes breathing3 {
+  0%, 100% {
+    transform: scaleY(1) rotate(0deg);
+  }
+  50% {
+    transform: scaleY(1.02) rotate(0.5deg);
   }
 }
 
 /* ──────────────────────────────────────────────────────── */
-/* Layer 5’s “pollination” keyframes */
+/* Layer 5’s “subtle pollination” keyframes */
 @keyframes pollingGlow5 {
   0% {
     filter:
-      drop-shadow(0 0 2px rgba(255, 165, 0, 0.3))
-      drop-shadow(0 0 4px rgba(173, 255, 47, 0.2));
+      drop-shadow(0 0 2px rgba(255, 165, 0, 0.15))
+      drop-shadow(0 0 3px rgba(173, 255, 47, 0.12));
   }
   40% {
     filter:
-      drop-shadow(0 0 8px rgba(255, 180, 0, 0.5))
-      drop-shadow(0 0 10px rgba(173, 255, 47, 0.3));
+      drop-shadow(0 0 5px rgba(255, 180, 0, 0.25))
+      drop-shadow(0 0 6px rgba(173, 255, 47, 0.18));
   }
   70% {
     filter:
-      drop-shadow(0 0 6px rgba(255, 200, 0, 0.4))
-      drop-shadow(0 0 12px rgba(173, 255, 47, 0.4));
+      drop-shadow(0 0 4px rgba(255, 200, 0, 0.2))
+      drop-shadow(0 0 6px rgba(173, 255, 47, 0.2));
   }
   100% {
     filter:
-      drop-shadow(0 0 2px rgba(255, 165, 0, 0.3))
-      drop-shadow(0 0 4px rgba(173, 255, 47, 0.2));
+      drop-shadow(0 0 2px rgba(255, 165, 0, 0.15))
+      drop-shadow(0 0 3px rgba(173, 255, 47, 0.12));
   }
 }
 
 /* ──────────────────────────────────────────────────────── */
-/* Layer 6’s “floral” keyframes */
+/* Layer 6’s “subtle floral” keyframes */
 @keyframes floralGlow6 {
   0% {
     filter:
-      drop-shadow(0 0 4px rgba(255, 175, 185, 0.4))
-      drop-shadow(0 0 6px rgba(240, 200, 255, 0.3));
+      drop-shadow(0 0 3px rgba(255, 175, 185, 0.2))
+      drop-shadow(0 0 4px rgba(240, 200, 255, 0.15));
   }
   25% {
     filter:
-      drop-shadow(0 0 10px rgba(255, 150, 175, 0.5))
-      drop-shadow(0 0 12px rgba(220, 180, 255, 0.4));
+      drop-shadow(0 0 6px rgba(255, 150, 175, 0.25))
+      drop-shadow(0 0 7px rgba(220, 180, 255, 0.2));
   }
   50% {
     filter:
-      drop-shadow(0 0 8px rgba(255, 200, 180, 0.5))
-      drop-shadow(0 0 10px rgba(200, 160, 255, 0.5));
+      drop-shadow(0 0 5px rgba(255, 200, 180, 0.2))
+      drop-shadow(0 0 6px rgba(200, 160, 255, 0.2));
   }
   75% {
     filter:
-      drop-shadow(0 0 10px rgba(255, 170, 190, 0.4))
-      drop-shadow(0 0 12px rgba(230, 190, 255, 0.3));
+      drop-shadow(0 0 6px rgba(255, 170, 190, 0.2))
+      drop-shadow(0 0 7px rgba(230, 190, 255, 0.15));
   }
   100% {
     filter:
-      drop-shadow(0 0 4px rgba(255, 175, 185, 0.4))
-      drop-shadow(0 0 6px rgba(240, 200, 255, 0.3));
+      drop-shadow(0 0 3px rgba(255, 175, 185, 0.2))
+      drop-shadow(0 0 4px rgba(240, 200, 255, 0.15));
   }
 }
 
 /* ──────────────────────────────────────────────────────── */
-/* Layer 9’s new “flight path” keyframes:
-   - 0%: start at the original bottom-right position.
-   - 20%-35%: move up-and-left.
-   - 35%-55%: hold (“pause”).
-   - 55%-70%: move up-and-right.
-   - 70%-95%: hold (“pause”).
-   - 100%: return to start.
-*/
+/* Layer 9’s continuous “flight path” keyframes */
 @keyframes flightPath9 {
   0%   { transform: translate(0, 0) rotate(0deg); }
   25%  { transform: translate(-15px, 16px) rotate(-4deg); }
@@ -189,16 +220,26 @@
 }
 
 /* ──────────────────────────────────────────────────────── */
-/* Layer 11’s “cyan→lime” keyframes */
+/* Layer 11’s “subtle cyan→lime” glow keyframes */
 @keyframes heartbeatGlow11 {
   0%, 60% {
     filter:
-      drop-shadow(0 0 4px rgba(0, 200, 255, 0.3))
-      drop-shadow(0 0 6px rgba(150, 255, 150, 0.2));
+      drop-shadow(0 0 3px rgba(0, 200, 255, 0.15))
+      drop-shadow(0 0 4px rgba(150, 255, 150, 0.12));
   }
   20% {
     filter:
-      drop-shadow(0 0 10px rgba(0, 200, 255, 0.5))
-      drop-shadow(0 0 12px rgba(150, 255, 150, 0.4));
+      drop-shadow(0 0 6px rgba(0, 200, 255, 0.25))
+      drop-shadow(0 0 7px rgba(150, 255, 150, 0.18));
+  }
+}
+
+/* Layer 11’s “breathing” keyframes */
+@keyframes breathing11 {
+  0%, 100% {
+    transform: scaleX(1) rotate(0deg);
+  }
+  50% {
+    transform: scaleX(1.02) rotate(0.5deg);
   }
 }
