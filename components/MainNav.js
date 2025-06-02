@@ -1,5 +1,5 @@
 // components/MainNav.js
-import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
+import { Navbar, Nav, Container } from 'react-bootstrap';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabaseClient';
@@ -39,14 +39,7 @@ export default function MainNav() {
             {session && (
               <>
                 <Nav.Link as={Link} href="/portfolio">Portfolio</Nav.Link>
-                <NavDropdown title="Dashboard" id="dashboard-nav-dropdown">
-                  <NavDropdown.Item as={Link} href="/dashboard">Overview</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} href="/dashboard/profile">Admin Profile</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} href="/dashboard/editProfile">Edit Profile</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} href="/dashboard/addPost">Add Post</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} href="/dashboard/editPost">Edit Post</NavDropdown.Item>
-                  <NavDropdown.Item as={Link} href="/dashboard/managePost">Manage Posts</NavDropdown.Item>
-                </NavDropdown>
+                <Nav.Link as={Link} href="/dashboard">Dashboard</Nav.Link>
               </>
             )}
           </Nav>
