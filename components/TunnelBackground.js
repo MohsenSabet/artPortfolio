@@ -96,7 +96,8 @@ void main() {
     vec2 seed2 = floor(p2.xy * uResolution.x * 2.0);
     vec3 rnd = nrand3(seed);
     vec3 rnd2 = nrand3(seed2);
-    vec4 star = (vec4(pow(rnd.y, 50.0)) + vec4(pow(rnd2.y, 50.0))) * 2.5;
+    // intensify star brightness
+    vec4 star = (vec4(pow(rnd.y, 50.0)) + vec4(pow(rnd2.y, 50.0))) * 12.0;
     star.a = 1.0;
 
     // combine fractal and stars
@@ -105,8 +106,9 @@ void main() {
                   + c2 + star;
 
     // deep background tint
-    vec3 darkTint = vec3(0.002, 0.0, 0.03);
-    galaxy.rgb = mix(darkTint, galaxy.rgb, 0.2);
+    vec3 darkTint = vec3(0.0, 0.0, 0.15);
+    // stronger deep-blue tint (10% original galaxy, 90% tint)
+    galaxy.rgb = mix(darkTint, galaxy.rgb, 0.1);
 
     gl_FragColor = galaxy;
 }
