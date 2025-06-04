@@ -18,18 +18,7 @@ export default function Home() {
    const maskFilter = useTransform(maskLevel, g => `grayscale(${g * 100}%)`);
 
    // pulsing circular mask hole around logo
-   const maskRadius = useMotionValue(170);
-   useEffect(() => {
-     animate(maskRadius, [170, 185, 165, 180, 170], {
-       duration: 4.8,
-       repeat: Infinity,
-       repeatType: 'loop',
-       ease: 'easeInOut'
-     });
-   }, []);
-   const maskImage = useTransform(maskRadius, r =>
-     `radial-gradient(circle ${r}px at center, transparent ${r}px, black ${r + 40}px)`
-   );
+
 
    // Scroll-driven animation hooks
    const progress = useMotionValue(0);
@@ -124,7 +113,7 @@ export default function Home() {
            maskRepeat: 'no-repeat',
            WebkitMaskRepeat: 'no-repeat',
            transition: 'mask-position 0.3s ease-out, -webkit-mask-position 0.3s ease-out',
-           maskImage
+        
          }}
        />
      </div>

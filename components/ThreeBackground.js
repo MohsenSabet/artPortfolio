@@ -146,7 +146,7 @@ function ThreeBackground() {
         {/* nebula clouds for depth and atmosphere */}
       <Cloud
         position={[0, 0, -5]}
-        opacity={0.4}
+        opacity={0.9}
         speed={0.2}
         width={20}
         depth={1}
