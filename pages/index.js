@@ -6,13 +6,13 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 
 // client-only 3D background
-const ThreeBackground = dynamic(() => import('@/components/ThreeBackground'), { ssr: false });
+const NebulaBackground = dynamic(() => import('@/components/NebulaBackground'), { ssr: false });
 
 export default function Home() {
    const [profile, setProfile] = useState(null);
    const [loading, setLoading] = useState(true);
    // memoize background to avoid re-mounts
-   const background = useMemo(() => <ThreeBackground />, []);
+   const background = useMemo(() => <NebulaBackground />, []);
    // mask grayscale level: 0.8 => 80%, 0 => 0%
    const maskLevel = useMotionValue(0.99);
    const maskFilter = useTransform(maskLevel, g => `grayscale(${g * 100}%)`);
@@ -52,11 +52,11 @@ export default function Home() {
               ease: 'easeInOut',
             }}
             onMouseEnter={() => {
-              animate(bgSpeed, 20, { duration: 0.6 });
+              animate(bgSpeed, 10, { duration: 0.6 });
               animate(maskLevel, 0, { duration: 0.9 });
             }}
             onMouseLeave={() => {
-              animate(bgSpeed, 1, { duration: 0.5 });
+              animate(bgSpeed, 0.2, { duration: 0.5 });
               animate(maskLevel, 0.8, { duration: 0.5 });
             }}
           />
