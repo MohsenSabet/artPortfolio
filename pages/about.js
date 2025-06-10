@@ -56,13 +56,7 @@ export default function About({ profile }) {
             </div>
           </div>
           <div className={styles.imageStackContainer}>
-            {/* 4a) Blinking stars (if still desired) */}
-            <div className={styles.blinkingStars}>
-              <div className={styles.star} style={{ top: '20%', left: '30%' }} />
-              <div className={styles.star} style={{ top: '50%', left: '60%' }} />
-              <div className={styles.star} style={{ top: '75%', left: '40%' }} />
-            </div>
-
+           
             {/* 4b) Stack every image at bottom‐right.
                   Layers 3, 5, 6, 9, and 11 get animation classes. */}
             {images.map((filename) => {

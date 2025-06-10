@@ -67,11 +67,6 @@
 .flight9 {
   will-change: filter, transform;
   pointer-events: auto; /* Allow hover events */
-
-  /*
-    —— No transition here. 
-    The 5s transition is on .stackImage above, which applies to all layers. 
-  */
 }
 
 /* 1) Ensure layer 3’s transform-origin is at the bottom center */
