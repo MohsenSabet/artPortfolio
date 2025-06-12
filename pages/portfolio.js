@@ -1,7 +1,7 @@
 /* pages/portfolio.js */
 /* eslint-disable @next/next/no-img-element */
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import dynamic from "next/dynamic";
@@ -15,6 +15,7 @@ const TunnelBackground = dynamic(
 );
 
 export default function Portfolio({ posts }) {
+  const [showBackBtn, setShowBackBtn] = useState(false);
   /* --- slide-by-slide animation (no scrubbing) --- */
   useEffect(() => {
     if (!posts?.length) return;
@@ -87,8 +88,20 @@ export default function Portfolio({ posts }) {
         },
       });
     });
+    // toggle back-to-top when sentinel at page end is in view
+    const sentinel = document.querySelector('.scroll-end-sentinel');
+    let observer;
+    if (sentinel) {
+      observer = new IntersectionObserver(([entry]) => {
+        setShowBackBtn(entry.isIntersecting);
+      }, { threshold: 1.0 });
+      observer.observe(sentinel);
+    }
 
-    return () => ScrollTrigger.getAll().forEach((st) => st.kill());
+    return () => {
+      ScrollTrigger.getAll().forEach((st) => st.kill());
+      if (observer) observer.disconnect();
+    };
   }, [posts]);
 
   /* --------------- JSX --------------- */
@@ -177,6 +190,38 @@ export default function Portfolio({ posts }) {
           line-height: 1.6;
           color: #eee;
         }
+        .back-to-top {
+          position: fixed;
+          bottom: 40px;
+          left: 50%;
+          transform: translate(-50%, 20px);
+          opacity: 0;
+          pointer-events: none;
+          padding: 0.75rem 1.25rem;
+          font-size: 1rem;
+          background: transparent;
+          color: #fff;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          z-index: 5;
+          transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .back-to-top.visible {
+          opacity: 1;
+          transform: translate(-50%, 0);
+          pointer-events: auto;
+        }
+        .back-to-top:hover {
+          /* gentle grow on hover */
+          transform: translate(-50%, 0) scale(1.4);
+        }
+        .back-to-top img {
+          width: 32px;
+          height: 32px;
+          transform: rotate(180deg);
+          display: block;
+        }
       `}</style>
 
       {/* background */}
@@ -221,6 +266,17 @@ export default function Portfolio({ posts }) {
           </section>
         ))}
       </div>
+     {/* sentinel at end to detect bottom */}
+     <div className="scroll-end-sentinel" style={{ height: '1px' }} />
+
+     {/* back to top button */}
+     <button
+       className={`back-to-top ${showBackBtn ? 'visible' : ''}`}
+       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+       aria-label="Back to Top"
+     >
+       <img src="/images/portfilio/arrow.gif" alt="Back to Top" width="32" height="32" />
+     </button>
     </>
   );
 }
@@ -234,6 +290,7 @@ export async function getServerSideProps() {
     )
     .eq("featured", true)
     .eq("privacy", "Public")
+    .order("category", { ascending: true })
     .order("created_at", { ascending: true });
 
   if (error) console.error("Error fetching featured posts:", error.message);
