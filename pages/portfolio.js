@@ -16,6 +16,7 @@ const TunnelBackground = dynamic(
 
 export default function Portfolio({ posts }) {
   const [showBackBtn, setShowBackBtn] = useState(false);
+
   /* --- slide-by-slide animation (no scrubbing) --- */
   useEffect(() => {
     if (!posts?.length) return;
@@ -222,6 +223,46 @@ export default function Portfolio({ posts }) {
           transform: rotate(180deg);
           display: block;
         }
+        /* vertical ribbon on right */
+        .vertical-ribbon-wrapper {
+          position: fixed;
+          top: 50%;
+          right: 40px;
+          transform: translateY(-50%);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          z-index: 6;
+          max-height: 80vh;
+          overflow-y: auto;
+          /* hide scrollbar on Firefox and IE */
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .vertical-ribbon {
+          display: flex;
+          flex-direction: column;
+          padding: 0.5rem 0;
+        }
+        /* hide scrollbar on WebKit */
+        .vertical-ribbon-wrapper::-webkit-scrollbar {
+          width: 0;
+          height: 0;
+        }
+        .vertical-ribbon img {
+          width: 60px;
+          height: 60px;
+          object-fit: cover;
+          margin-bottom: 0.5rem;
+          cursor: pointer;
+          transition: transform 0.3s, box-shadow 0.3s;
+          border-radius: 4px;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+        .vertical-ribbon img:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+        }
       `}</style>
 
       {/* background */}
@@ -240,11 +281,24 @@ export default function Portfolio({ posts }) {
       <div className="category-label-wrapper">
         <span className="category-label" />
       </div>
+     {/* vertical ribbon with thumbnails */}
+     <div className="vertical-ribbon-wrapper">
+       <div className="vertical-ribbon">
+         {posts.map((post, idx) => (
+           <img
+             key={post.id}
+             src={post.media_url}
+             alt={post.title}
+             onClick={() => document.getElementById(`slide-${idx}`)?.scrollIntoView({ behavior: 'smooth' })}
+           />
+         ))}
+       </div>
+     </div>
 
       {/* slide stack */}
       <div className="slides-wrapper">
-        {posts.map((post) => (
-          <section key={post.id} className="post-slide">
+        {posts.map((post, idx) => (
+          <section id={`slide-${idx}`} key={post.id} className="post-slide">
             {post.media_url && (
               <img
                 src={post.media_url}
