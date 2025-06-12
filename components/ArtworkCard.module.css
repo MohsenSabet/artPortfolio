@@ -4,6 +4,7 @@
   background: transparent;
   overflow: hidden;
   transition: transform 0.3s ease-out;
+  max-width: 300px;
 }
 .artworkCard:hover {
   transform: scale(1.03);
@@ -34,6 +35,8 @@
   height: auto;
   display: block;
   transition: transform 0.3s ease-out;
+  max-height: 250px;
+  object-fit: cover;
 }
 .mediaContainer:hover video,
 .mediaContainer:hover img {

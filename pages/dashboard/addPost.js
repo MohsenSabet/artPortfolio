@@ -173,6 +173,15 @@ export default function AddPost() {
               <option>Photography</option>
               <option>Digital</option>
               <option>Other</option>
+              <option>Life & Gesture Study</option>        {/* hands, poses, anatomy sketches */}
+              <option>Character & Creature</option>        {/* stylized faces, animals, hybrids */}
+              <option>Environment & Worldbuilding</option>  {/* castles, courtyards, landscapes */}
+              <option>Concept & Experimental</option>      {/* “Process!”, abstract sketches */}
+              <option>Watercolor Study</option>            {/* whales, gannets, landscapes */}
+              <option>Ink & Linework</option>              {/* fineliner portraits, texture studies */}   <option>Marker Illustration</option>         {/* bold marker portraits series */}
+              <option>Traditional Mixed Media</option>     {/* pencil + pen + color mixtures */}
+              <option>Digital Illustration</option>        {/* any purely digital pieces */}
+              <option>Other</option>
             </Form.Select>
           </Form.Group>
           <Form.Check className="ms-4 text-dark mb-2" type="checkbox" label="Include Date" name="includeDate" checked={formData.includeDate} onChange={handleChange} />
