@@ -63,7 +63,9 @@ export default function Home() {
         >
           {/* Clickable menu trigger (transparent circle) */}
           <motion.div variants={{ open: {}, closed: {} }} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1 }}>
-            <Image src="/images/home/UFo1.png" alt="UFO1" width={260} height={260} style={{ pointerEvents: 'none' }} />
+            <motion.div variants={{ open: { opacity: 0 }, closed: { opacity: 1 } }} transition={{ duration: 0.3 }} style={{ pointerEvents: 'none' }}>
+              <Image src="/images/home/UFo1.png" alt="UFO1" width={260} height={260} />
+            </motion.div>
             <motion.div variants={{ open: { opacity: 1 }, closed: { opacity: 0 } }} style={{ position: 'absolute', top: 0, left: 0, opacity: 0, pointerEvents: 'none' }} transition={{ duration: 0.3 }}>
               <Image src="/images/home/Ufo2.PNG" alt="UFO2" width={260} height={260} />
             </motion.div>
