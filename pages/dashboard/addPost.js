@@ -1,83 +1,144 @@
+// pages/dashboard/addPost.js
 import { useState, useEffect } from 'react';
-import { Form, Button, Row, Col, Alert } from 'react-bootstrap';
+import { Form, Button, Alert } from 'react-bootstrap';
 import { FaArrowLeft, FaImage, FaPaperclip } from 'react-icons/fa';
 import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabaseClient';
-import 'react-quill-new/dist/quill.snow.css';
 import dynamic from 'next/dynamic';
-const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
-// Dynamically load ReactDatePicker to prevent SSR errors
+
+/* ─────────────────────────────
+   React-Quill: defer CSS to client
+───────────────────────────── */
+const ReactQuill = dynamic(async () => {
+  const { default: Quill } = await import('react-quill-new');
+  if (typeof window !== 'undefined') {
+    // theme JS needs document.* so load only in the browser
+    await import('react-quill-new/dist/quill.snow.css');
+  }
+  return Quill;
+}, { ssr: false });
+
+/* date-picker (already safe) */
 const ReactDatePicker = dynamic(() => import('react-datepicker'), { ssr: false });
 import 'react-datepicker/dist/react-datepicker.css';
 
 export default function AddPost() {
   const router = useRouter();
+
+  /* ── auth gate ── */
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) router.push('/login');
     });
   }, [router]);
-  const [formData, setFormData] = useState({ media: null, title: '', category: 'Painting', description: '', privacy: 'Public', includeDate: false, date: null, includeTime: false, time: '', featured: false });
+
+  /* ── state ── */
+  const [formData, setFormData] = useState({
+    media: null,
+    title: '',
+    category: 'Painting',
+    description: '',
+    privacy: 'Public',
+    includeDate: false,
+    date: null,
+    includeTime: false,
+    time: '',
+    featured: false,
+  });
   const [previewUrl, setPreviewUrl] = useState(null);
   const [errors, setErrors] = useState({});
-  const [status, setStatus] = useState({ loading: false, error: null, success: false, message: '' });
+  const [status, setStatus] = useState({
+    loading: false,
+    error: null,
+    success: false,
+    message: '',
+  });
 
+  /* ── helpers ── */
   const handleChange = (e) => {
     const { name, files, value, type, checked } = e.target;
     if (type === 'file' && files) {
-      const file = files[0]; setFormData(prev => ({ ...prev, media: file })); setPreviewUrl(URL.createObjectURL(file));
+      const file = files[0];
+      setFormData((p) => ({ ...p, media: file }));
+      setPreviewUrl(URL.createObjectURL(file));
     } else if (type === 'checkbox') {
-      setFormData(prev => ({ ...prev, [name]: checked }));
+      setFormData((p) => ({ ...p, [name]: checked }));
     } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
+      setFormData((p) => ({ ...p, [name]: value }));
     }
   };
 
-  const removeMedia = () => { setFormData(prev => ({ ...prev, media: null })); setPreviewUrl(null); };
+  const removeMedia = () => {
+    setFormData((p) => ({ ...p, media: null }));
+    setPreviewUrl(null);
+  };
 
-  const handleClear = () => { setFormData({ media: null, title: '', category: 'Painting', description: '', privacy: 'Public', includeDate: false, date: null, includeTime: false, time: '', featured: false }); setPreviewUrl(null); setErrors({}); setStatus({ loading: false, error: null, success: false, message: '' }); };
+  const clearForm = () => {
+    setFormData({
+      media: null,
+      title: '',
+      category: 'Painting',
+      description: '',
+      privacy: 'Public',
+      includeDate: false,
+      date: null,
+      includeTime: false,
+      time: '',
+      featured: false,
+    });
+    setPreviewUrl(null);
+    setErrors({});
+    setStatus({ loading: false, error: null, success: false, message: '' });
+  };
+
   const handleCancel = () => router.push('/dashboard');
+
+  /* ── submit ── */
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     const newErrors = {};
     if (!formData.media) newErrors.media = 'Please upload an image or video.';
     if (!formData.description) newErrors.description = 'Description is required.';
     if (Object.keys(newErrors).length) return setErrors(newErrors);
+
     setErrors({});
     setStatus({ loading: true, error: null, success: false, message: '' });
-    // Upload media file to Supabase Storage bucket 'posts'
+
+    /* auth check */
     const { data: { session } } = await supabase.auth.getSession();
-    console.log('Supabase session:', session);
-    console.log('Session user ID:', session?.user?.id);
-    console.log('Session access token:', session?.access_token);
     if (!session) {
-      setStatus({ loading: false, error: 'Not authenticated', success: false, message: '' });
+      setStatus({ loading: false, error: 'Not authenticated', success: false });
       return;
     }
-    // Ensure profile exists to satisfy posts.author_id foreign key
+
+    /* ensure profile row */
     const { error: profileError } = await supabase
       .from('profiles')
       .upsert({ id: session.user.id, email: session.user.email });
     if (profileError) {
-      setStatus({ loading: false, error: profileError.message, success: false, message: '' });
+      setStatus({ loading: false, error: profileError.message, success: false });
       return;
     }
-    let mediaUrl;
+
+    /* upload media if file */
+    let mediaUrl = formData.media;
     if (formData.media instanceof File) {
       const fileExt = formData.media.name.split('.').pop();
       const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from('posts').upload(fileName, formData.media);
+      const { error: uploadError } = await supabase
+        .storage
+        .from('posts')
+        .upload(fileName, formData.media);
       if (uploadError) {
-        setStatus({ loading: false, error: uploadError.message, success: false, message: '' });
+        setStatus({ loading: false, error: uploadError.message, success: false });
         return;
       }
-      const { data } = supabase.storage.from('posts').getPublicUrl(fileName);
-      mediaUrl = data.publicUrl;
-    } else {
-      mediaUrl = formData.media;
+      mediaUrl = supabase.storage.from('posts').getPublicUrl(fileName).data.publicUrl;
     }
-    // Insert post record
-    const postObj = {
+
+    /* insert post */
+    const { error: insertError } = await supabase.from('posts').insert({
       author_id: session.user.id,
       title: formData.title,
       media_url: mediaUrl,
@@ -88,66 +149,77 @@ export default function AddPost() {
       include_time: formData.includeTime,
       time: formData.includeTime ? formData.time : null,
       featured: formData.featured,
-      description: formData.description
-    };
-    console.log('Inserting post object:', postObj);
-    const { data: insertData, error: insertError } = await supabase.from('posts').insert(postObj);
-    console.log('Insert response data:', insertData, 'error:', insertError);
+      description: formData.description,
+    });
+
     if (insertError) {
-      setStatus({ loading: false, error: insertError.message, success: false, message: '' });
+      setStatus({ loading: false, error: insertError.message, success: false });
     } else {
-      // confirmation
-      setStatus({ loading: false, error: null, success: true, message: 'Post added successfully!' });
-      // clear form
-      setFormData({ media: null, title: '', category: 'Painting', description: '', privacy: 'Public', includeDate: false, date: null, includeTime: false, time: '', featured: false });
-      setPreviewUrl(null);
+      setStatus({ loading: false, success: true, message: 'Post added successfully!' });
+      clearForm();
     }
   };
 
-  // Quill configuration: enable fonts, sizes, formatting, and keyboard, no file attachments
+  /* ── Quill config ── */
   const quillModules = {
     toolbar: [
-      [{ 'font': [] }],
-      [{ 'size': ['small', false, 'large', 'huge'] }],
+      [{ font: [] }],
+      [{ size: ['small', false, 'large', 'huge'] }],
       ['bold', 'italic', 'underline', 'strike'],
-      [{ 'color': [] }, { 'background': [] }],
-      [{ 'script': 'sub' }, { 'script': 'super' }],
-      [{ 'header': [1, 2, 3, 4, false] }],
-      [{ 'align': [] }],
-      ['clean']
+      [{ color: [] }, { background: [] }],
+      [{ script: 'sub' }, { script: 'super' }],
+      [{ header: [1, 2, 3, 4, false] }],
+      [{ align: [] }],
+      ['clean'],
     ],
-    keyboard: true
+    keyboard: true,
   };
-  const quillFormats = ['font', 'size', 'bold', 'italic', 'underline', 'strike', 'color', 'background', 'script', 'header', 'align'];
+  const quillFormats = [
+    'font', 'size', 'bold', 'italic', 'underline', 'strike',
+    'color', 'background', 'script', 'header', 'align',
+  ];
 
+  /* ── render ── */
   return (
     <div className="border rounded shadow-md bg-light">
+      {/* alerts */}
       {status.error && <Alert variant="danger" className="m-3">{status.error}</Alert>}
       {status.success && <Alert variant="success" className="m-3">{status.message}</Alert>}
-      {/* Header */}
+
+      {/* header */}
       <div className="d-flex align-items-center p-3 border-bottom">
-        <FaArrowLeft className="me-3 cursor-pointer text-dark" size={20} onClick={handleCancel} />
+        <FaArrowLeft size={20} className="me-3 cursor-pointer text-dark" onClick={handleCancel} />
         <h5 className="m-0 flex-grow-1 text-center text-dark">Create Post</h5>
         <div style={{ width: 20 }} />
       </div>
-      {/* Body */}
+
+      {/* body */}
       <div className="p-3">
-        {/* Title */}
-        <Form.Control type="text" placeholder="Post Title" name="title" value={formData.title} onChange={handleChange} className="border-1 fs-10  mb-3" />
-        {/* Description with ReactQuill */}
+        {/* title */}
+        <Form.Control
+          type="text"
+          placeholder="Post Title"
+          name="title"
+          value={formData.title}
+          onChange={handleChange}
+          className="border-1 fs-10 mb-3"
+        />
+
+        {/* description */}
         <ReactQuill
           theme="snow"
           modules={quillModules}
           formats={quillFormats}
           value={formData.description}
-          onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+          onChange={(value) => setFormData((p) => ({ ...p, description: value }))}
           className="mb-3 resizable-quill"
         />
-        {/* Icon bar */}
+
+        {/* toolbar */}
         <div className="d-flex align-items-center mt-3 flex-wrap">
+          {/* media upload icon */}
           <label htmlFor="mediaUpload" className="me-0 mb-0 cursor-pointer text-secondary">
             <FaImage size={20} />
-
           </label>
           <Form.Control
             id="mediaUpload"
@@ -157,7 +229,10 @@ export default function AddPost() {
             onChange={handleChange}
             style={{ display: 'none' }}
           />
+          {/* attachment icon (placeholder for future use) */}
           <FaPaperclip className="ms-2 me-auto cursor-pointer text-secondary" size={20} />
+
+          {/* privacy select */}
           <Form.Group controlId="formPrivacy" className="d-flex align-items-center m-0 mb-2">
             <Form.Label className="me-2 mb-0 text-dark">Privacy</Form.Label>
             <Form.Select size="sm" name="privacy" value={formData.privacy} onChange={handleChange}>
@@ -166,42 +241,72 @@ export default function AddPost() {
               <option>Unlisted</option>
             </Form.Select>
           </Form.Group>
-          {/* Category and Options */}
+
+          {/* category select */}
           <Form.Group controlId="formCategory" className="d-flex align-items-center m-0 ms-4 mb-2">
             <Form.Label className="me-2 mb-0 text-dark">Category</Form.Label>
             <Form.Select size="sm" name="category" value={formData.category} onChange={handleChange}>
               <option>Painting</option>
-                  <option>Illustration</option>
-                  <option>Photography</option>
-                  <option>Digital</option>
-                  <option>Life & Gesture Study</option>        {/* hands, poses, anatomy sketches */}
-                  <option>Character & Creature</option>        {/* stylized faces, animals, hybrids */}
-                  <option>Environment & Worldbuilding</option>  {/* castles, courtyards, landscapes */}
-                  <option>Concept & Experimental</option>      {/* “Process!”, abstract sketches */}
-                  <option>Watercolor Study</option>            {/* whales, gannets, landscapes */}
-                  <option>Ink & Linework</option>              {/* fineliner portraits, texture studies */}   <option>Marker Illustration</option>         {/* bold marker portraits series */}
-                  <option>Traditional Mixed Media</option>     {/* pencil + pen + color mixtures */}
-                  <option>Digital Illustration</option> 
-                  <option>Gesture & Life Study</option>
-                  <option>Character & Creature</option>
-                  <option>Environment & World-building</option>
-                  <option>Colour & Rendering</option>
-                  <option>Concept / Experimental</option>
+              <option>Illustration</option>
+              <option>Photography</option>
+              <option>Digital</option>
+              <option>Life & Gesture Study</option>
+              <option>Character & Creature</option>
+              <option>Environment & Worldbuilding</option>
+              <option>Concept & Experimental</option>
+              <option>Watercolor Study</option>
+              <option>Ink & Linework</option>
+              <option>Marker Illustration</option>
+              <option>Traditional Mixed Media</option>
+              <option>Digital Illustration</option>
+              <option>Gesture & Life Study</option>
+              <option>Colour & Rendering</option>
+              <option>Concept / Experimental</option>
             </Form.Select>
           </Form.Group>
-          <Form.Check className="ms-4 text-dark mb-2" type="checkbox" label="Include Date" name="includeDate" checked={formData.includeDate} onChange={handleChange} />
+
+          {/* include date */}
+          <Form.Check
+            className="ms-4 text-dark mb-2"
+            type="checkbox"
+            label="Include Date"
+            name="includeDate"
+            checked={formData.includeDate}
+            onChange={handleChange}
+          />
           {formData.includeDate && (
             <ReactDatePicker
               selected={formData.date}
-              onChange={(date) => setFormData(prev => ({ ...prev, date }))}
+              onChange={(date) => setFormData((p) => ({ ...p, date }))}
               dateFormat="yyyy-MM-dd"
               className="form-control form-control-sm ms-2 mb-2"
             />
           )}
-          {formData.includeTime && <Form.Control type="time" name="time" value={formData.time} onChange={handleChange} size="sm" className="ms-2 mb-2" />}
-          <Form.Check className="ms-4 text-dark mb-2" type="checkbox" label="Featured" name="featured" checked={formData.featured} onChange={handleChange} />
+
+          {/* include time (toggle via includeTime in state) */}
+          {formData.includeTime && (
+            <Form.Control
+              type="time"
+              name="time"
+              value={formData.time}
+              onChange={handleChange}
+              size="sm"
+              className="ms-2 mb-2"
+            />
+          )}
+
+          {/* featured */}
+          <Form.Check
+            className="ms-4 text-dark mb-2"
+            type="checkbox"
+            label="Featured"
+            name="featured"
+            checked={formData.featured}
+            onChange={handleChange}
+          />
         </div>
-        {/* Preview */}
+
+        {/* preview */}
         {previewUrl && (
           <div className="d-flex gap-2 mt-3">
             <div className="position-relative">
@@ -216,15 +321,22 @@ export default function AddPost() {
                 size="sm"
                 className="position-absolute top-0 end-0 p-0"
                 onClick={removeMedia}
-              >×</Button>
+              >
+                ×
+              </Button>
             </div>
           </div>
         )}
       </div>
-      {/* Footer */}
+
+      {/* footer */}
       <div className="d-flex justify-content-end p-3 border-top bg-light">
-        <Button variant="outline-secondary" onClick={handleClear} className="me-2">Clear</Button>
-        <Button variant="primary" onClick={handleSubmit} disabled={status.loading}>{status.loading ? 'Publishing...' : 'Publish'}</Button>
+        <Button variant="outline-secondary" onClick={clearForm} className="me-2">
+          Clear
+        </Button>
+        <Button variant="primary" onClick={handleSubmit} disabled={status.loading}>
+          {status.loading ? 'Publishing...' : 'Publish'}
+        </Button>
       </div>
     </div>
   );
