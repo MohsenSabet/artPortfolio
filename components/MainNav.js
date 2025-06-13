@@ -22,10 +22,10 @@ export default function MainNav() {
   };
 
   return (
-    <Navbar
+    <Navbar collapseOnSelect
       className={`${styles.neonNav} ${router.pathname === '/' ? styles.transparent : ''}`}
       expand="lg"
-      variant="dark"
+      variant="dark"  
     >
       <Container>
         <Navbar.Brand as={Link} href="/">Art Portfolio</Navbar.Brand>
