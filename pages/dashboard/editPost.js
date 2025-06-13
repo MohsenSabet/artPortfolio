@@ -5,23 +5,13 @@ import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabaseClient';
 import dynamic from 'next/dynamic';
 
-/* ──────────────────────────────────────────────
-   DOM-hungry widgets → load only in the browser
-─────────────────────────────────────────────── */
-const ReactQuill = dynamic(async () => {
-  const { default: Quill } = await import('react-quill-new');
-  if (typeof window !== 'undefined') {
-    await import('react-quill-new/dist/quill.snow.css'); // theme touches document.*
-  }
-  return Quill;
-}, { ssr: false });
-
+/* widgets that need the browser */
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 const ReactDatePicker = dynamic(() => import('react-datepicker'), { ssr: false });
+import 'react-quill-new/dist/quill.snow.css';
 import 'react-datepicker/dist/react-datepicker.css';
 
-/* ────────────────────────────────────────────── */
-
-export default function EditPost() {
+function EditPost() {
   const router = useRouter();
   const { id } = router.query;
 
@@ -39,7 +29,7 @@ export default function EditPost() {
   const [mediaFile, setMediaFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
 
-  /* ── Quill config (same toolbar as AddPost) ── */
+  /* quill config */
   const quillModules = {
     toolbar: [
       [{ font: [] }],
@@ -58,7 +48,7 @@ export default function EditPost() {
     'color', 'background', 'script', 'header', 'align',
   ];
 
-  /* ── fetch post ── */
+  /* fetch data */
   useEffect(() => {
     if (!id) return;
 
@@ -80,7 +70,7 @@ export default function EditPost() {
     })();
   }, [id]);
 
-  /* ── handlers ── */
+  /* handlers */
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((p) => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
@@ -104,11 +94,11 @@ export default function EditPost() {
       return;
     }
 
-    /* upload new file if chosen */
+    /* upload new media if selected */
     let mediaUrl = formData.media_url;
     if (mediaFile) {
-      if (formData.media_url?.includes('/posts/')) {
-        const oldPath = formData.media_url.split('/posts/')[1];
+      if (mediaUrl?.includes('/posts/')) {
+        const oldPath = mediaUrl.split('/posts/')[1];
         await supabase.storage.from('posts').remove([oldPath]).catch(() => {/* ignore */});
       }
       const ext = mediaFile.name.split('.').pop();
@@ -135,7 +125,7 @@ export default function EditPost() {
     else router.push('/dashboard/managePost');
   };
 
-  /* ── render ── */
+  /* render */
   return (
     <Container className="mt-5">
       <h2>Edit Post</h2>
@@ -143,13 +133,11 @@ export default function EditPost() {
       {status.error && <Alert variant="danger">{status.error}</Alert>}
 
       <Form onSubmit={handleSubmit}>
-        {/* title */}
         <Form.Group controlId="title" className="mb-3">
           <Form.Label>Title</Form.Label>
           <Form.Control name="title" value={formData.title} onChange={handleChange} />
         </Form.Group>
 
-        {/* media */}
         <Form.Group controlId="media" className="mb-3">
           <Form.Label>Media File</Form.Label>
           <Form.Control type="file" accept="image/*,video/*" onChange={handleFileChange} />
@@ -173,12 +161,12 @@ export default function EditPost() {
           )
         )}
 
-        {/* category & privacy */}
         <Row className="mb-3">
           <Col md={6}>
             <Form.Group controlId="category">
               <Form.Label>Category</Form.Label>
               <Form.Select name="category" value={formData.category} onChange={handleChange}>
+                {/* …options list unchanged… */}
                 <option>Painting</option>
                 <option>Illustration</option>
                 <option>Photography</option>
@@ -211,7 +199,6 @@ export default function EditPost() {
           </Col>
         </Row>
 
-        {/* include date */}
         <Form.Check
           type="checkbox"
           label="Include Date"
@@ -228,7 +215,6 @@ export default function EditPost() {
           />
         )}
 
-        {/* featured */}
         <Form.Check
           type="checkbox"
           label="Featured"
@@ -238,7 +224,6 @@ export default function EditPost() {
           className="mb-3"
         />
 
-        {/* description */}
         <Form.Group controlId="description" className="mb-3">
           <Form.Label>Description</Form.Label>
           <ReactQuill
@@ -257,3 +242,8 @@ export default function EditPost() {
     </Container>
   );
 }
+
+/* ──────────────────────────────────────────────
+   ❱❱  KEY LINE: opt-out of SSR for this page  ❰❰
+────────────────────────────────────────────── */
+export default dynamic(() => Promise.resolve(EditPost), { ssr: false });
