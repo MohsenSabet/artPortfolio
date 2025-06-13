@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import dynamic from "next/dynamic";
 import Head from "next/head";
 import { supabase } from "@/lib/supabaseClient";
+import portfolioStyles from "@/styles/portfolioStyles";
 
 /* ------------ background component ------------ */
 const TunnelBackground = dynamic(
@@ -23,7 +24,7 @@ export default function Portfolio({ posts }) {
 
     gsap.registerPlugin(ScrollTrigger);
 
-    const slides = gsap.utils.toArray(".post-slide");
+    const slides = gsap.utils.toArray(".post-slide:not(.intro-slide)");
     const labelEl = document.querySelector(".category-label");
 
     // animate category label on change
@@ -38,12 +39,16 @@ export default function Portfolio({ posts }) {
     // initial label without animation
     labelEl.textContent = posts[0].category;
 
+    // initial label and ribbon hidden off-screen for graceful entrance
+    gsap.set('.category-label', { autoAlpha: 0, x: -30 });
+    gsap.set('.vertical-ribbon-wrapper', { autoAlpha: 0, x: 30 });
+
     /* initial state for every slide */
     slides.forEach((slide) =>
       gsap.set(slide, { autoAlpha: 0, scale: 0.94, yPercent: 10 })
     );
 
-    /* “play once per scroll” triggers for each slide */
+    /* play triggers for each slide */
     slides.forEach((slide, i) => {
       ScrollTrigger.create({
         trigger: slide,
@@ -89,6 +94,24 @@ export default function Portfolio({ posts }) {
         },
       });
     });
+    // hide intro slide and organically reveal label and ribbon
+    ScrollTrigger.create({
+      trigger: '#slide-0',
+      start: 'top top',
+      onEnter: () => {
+        const tl = gsap.timeline();
+        tl.to('#intro-slide', { autoAlpha: 0, yPercent: -100, duration: 0.8, ease: 'power3.in' });
+        tl.to('.category-label', { autoAlpha: 1, x: 0, duration: 0.8, ease: 'power3.out' }, '-=0.4');
+        tl.to('.vertical-ribbon-wrapper', { autoAlpha: 1, x: 0, duration: 0.8, ease: 'power3.out' }, '-=0.6');
+      },
+      onLeaveBack: () => {
+        const tl2 = gsap.timeline();
+        tl2.to('.category-label', { autoAlpha: 0, x: -30, duration: 0.8, ease: 'power3.in' });
+        tl2.to('.vertical-ribbon-wrapper', { autoAlpha: 0, x: 30, duration: 0.8, ease: 'power3.in' }, '-=0.6');
+        tl2.to('#intro-slide', { autoAlpha: 1, yPercent: 0, duration: 0.8, ease: 'power3.out' }, '-=0.6');
+      }
+    });
+
     // toggle back-to-top when sentinel at page end is in view
     const sentinel = document.querySelector('.scroll-end-sentinel');
     let observer;
@@ -108,162 +131,8 @@ export default function Portfolio({ posts }) {
   /* --------------- JSX --------------- */
   return (
     <>
-      <Head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+Pro:wght@400;600&display=swap"
-          rel="stylesheet"
-        />
-      </Head>
-
-      <style jsx global>{`
-        html,
-        body {
-          margin: 0;
-          padding: 0;
-          background: transparent;
-          overflow-x: hidden;
-        }
-
-        /* fixed wrapper at mid-left */
-        .category-label-wrapper {
-          width: 0;
-          height: 0;
-          position: fixed;
-          left: 40px;
-          top: 50%;
-          transform: translateY(-50%);
-          z-index: 5;
-        }
-
-        /* rotated text inside wrapper */
-        .category-label {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%) rotate(-90deg);
-          transform-origin: center center;
-          font-family: "Playfair Display", serif;
-          font-size: 1.4rem;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.25em;
-          white-space: nowrap;
-          text-align: center;
-          color: #fff;
-          text-shadow: 0 0 6px rgba(0, 0, 0, 0.6);
-        }
-
-        /* vertical flow — one full-viewport slide per section */
-        .slides-wrapper {
-          width: 100%;
-        }
-
-        .post-slide {
-          position: relative;
-          width: 100%;
-          height: 100vh;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 1.5rem;
-          padding: 2rem;
-        }
-        .post-slide:nth-child(odd) {
-          flex-direction: row-reverse;
-        }
-
-        .slide-text {
-          width: 45%;
-        }
-        .slide-text h2 {
-          font-family: "Playfair Display", serif;
-          font-size: 3rem;
-          font-weight: 700;
-          margin: 0 0 1rem;
-          color: #fff;
-        }
-        .slide-desc {
-          font-family: "Source Sans Pro", sans-serif;
-          font-weight: 400;
-          font-size: 1.2rem;
-          line-height: 1.6;
-          color: #eee;
-        }
-        .back-to-top {
-          position: fixed;
-          bottom: 40px;
-          left: 50%;
-          transform: translate(-50%, 20px);
-          opacity: 0;
-          pointer-events: none;
-          padding: 0.75rem 1.25rem;
-          font-size: 1rem;
-          background: transparent;
-          color: #fff;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          z-index: 5;
-          transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-        }
-        .back-to-top.visible {
-          opacity: 1;
-          transform: translate(-50%, 0);
-          pointer-events: auto;
-        }
-        .back-to-top:hover {
-          /* gentle grow on hover */
-          transform: translate(-50%, 0) scale(1.4);
-        }
-        .back-to-top img {
-          width: 32px;
-          height: 32px;
-          transform: rotate(180deg);
-          display: block;
-        }
-        /* vertical ribbon on right */
-        .vertical-ribbon-wrapper {
-          position: fixed;
-          top: 50%;
-          right: 40px;
-          transform: translateY(-50%);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          z-index: 6;
-          max-height: 80vh;
-          overflow-y: auto;
-          /* hide scrollbar on Firefox and IE */
-          scrollbar-width: none;
-          -ms-overflow-style: none;
-        }
-        .vertical-ribbon {
-          display: flex;
-          flex-direction: column;
-          padding: 0.5rem 0;
-        }
-        /* hide scrollbar on WebKit */
-        .vertical-ribbon-wrapper::-webkit-scrollbar {
-          width: 0;
-          height: 0;
-        }
-        .vertical-ribbon img {
-          width: 60px;
-          height: 60px;
-          object-fit: cover;
-          margin-bottom: 0.5rem;
-          cursor: pointer;
-          transition: transform 0.3s, box-shadow 0.3s;
-          border-radius: 4px;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-        }
-        .vertical-ribbon img:hover {
-          transform: scale(1.2);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
-        }
-      `}</style>
+      {/* global styles */}
+      <style jsx global>{portfolioStyles}</style>
 
       {/* background */}
       <TunnelBackground
@@ -281,35 +150,43 @@ export default function Portfolio({ posts }) {
       <div className="category-label-wrapper">
         <span className="category-label" />
       </div>
-     {/* vertical ribbon with thumbnails */}
-     <div className="vertical-ribbon-wrapper">
-       <div className="vertical-ribbon">
-         {posts.map((post, idx) => (
-           <img
-             key={post.id}
-             src={post.media_url}
-             alt={post.title}
-             onClick={() => document.getElementById(`slide-${idx}`)?.scrollIntoView({ behavior: 'smooth' })}
-           />
-         ))}
-       </div>
-     </div>
+
+      {/* vertical ribbon with thumbnails */}
+      <div className="vertical-ribbon-wrapper">
+        <div className="vertical-ribbon">
+          {posts.map((post, idx) => (
+            <img
+              key={post.id}
+              src={post.media_url}
+              alt={post.title}
+              onClick={() => document.getElementById(`slide-${idx}`)?.scrollIntoView({ behavior: 'smooth' })}
+            />
+          ))}
+        </div>
+      </div>
 
       {/* slide stack */}
       <div className="slides-wrapper">
+        {/* inline intro slide with call-to-action */}
+        <section id="intro-slide" className="post-slide intro-slide">
+          <span className="slide-indicator">
+            Scroll
+            <img src="/images/portfilio/arrow.gif" alt="down arrow" />
+          </span>
+        </section>
         {posts.map((post, idx) => (
           <section id={`slide-${idx}`} key={post.id} className="post-slide">
             {post.media_url && (
-              <img
-                src={post.media_url}
-                alt={post.title}
-                style={{
-                  maxHeight: "80%",
-                  maxWidth: "45%",
-                  objectFit: "cover",
-                }}
-              />
-            )}
+               <img
+                 src={post.media_url}
+                 alt={post.title}
+                 style={{
+                   maxHeight: "80%",
+                   maxWidth: "45%",
+                   objectFit: "cover",
+                 }}
+               />
+             )}
             <div className="slide-text">
               <h2>{post.title}</h2>
               <div
@@ -320,17 +197,19 @@ export default function Portfolio({ posts }) {
           </section>
         ))}
       </div>
-     {/* sentinel at end to detect bottom */}
-     <div className="scroll-end-sentinel" style={{ height: '1px' }} />
 
-     {/* back to top button */}
-     <button
-       className={`back-to-top ${showBackBtn ? 'visible' : ''}`}
-       onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-       aria-label="Back to Top"
-     >
-       <img src="/images/portfilio/arrow.gif" alt="Back to Top" width="32" height="32" />
-     </button>
+      {/* sentinel at end to detect bottom */}
+      <div className="scroll-end-sentinel" style={{ height: '1px' }} />
+
+      {/* back to top button */}
+      <button
+        className={`back-to-top ${showBackBtn ? 'visible' : ''}`}
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label="Back to Top"
+      >
+        <img src="/images/portfilio/arrow.gif" alt="Back to Top" width="32" height="32" />
+      </button>
+      {/* end of page content */}
     </>
   );
 }
