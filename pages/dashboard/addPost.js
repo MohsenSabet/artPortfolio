@@ -4,7 +4,8 @@ import { FaArrowLeft, FaImage, FaPaperclip } from 'react-icons/fa';
 import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabaseClient';
 import 'react-quill-new/dist/quill.snow.css';
-import ReactQuill from 'react-quill-new';
+import dynamic from 'next/dynamic';
+const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 import ReactDatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
