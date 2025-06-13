@@ -1,7 +1,6 @@
 /* ──────────────────────────────────────────────────────────────
    File: pages/dashboard/editPost.js
-   Updated pattern matches your working addPost: DOM-only libs
-   are imported *exclusively* in the browser, so no build crash.
+   Uses Client-only CSS injection for react-datepicker
 ────────────────────────────────────────────────────────────── */
 
 import { useState, useEffect } from 'react';
@@ -11,6 +10,7 @@ import { supabase } from '@/lib/supabaseClient';
 import dynamic from 'next/dynamic';
 
 /* ── browser-only widgets ───────────────────────────────────── */
+// ReactQuill stays the same
 const ReactQuill = dynamic(async () => {
   const { default: Quill } = await import('react-quill-new');
   if (typeof window !== 'undefined') {
@@ -19,13 +19,11 @@ const ReactQuill = dynamic(async () => {
   return Quill;
 }, { ssr: false });
 
-const ReactDatePicker = dynamic(async () => {
-  const mod = await import('react-datepicker');
-  if (typeof window !== 'undefined') {
-    await import('react-datepicker/dist/react-datepicker.css');
-  }
-  return mod.default;
-}, { ssr: false });
+// Plain dynamic import of react-datepicker (no CSS here)
+const ReactDatePicker = dynamic(
+  () => import('react-datepicker'),
+  { ssr: false }
+);
 /* ───────────────────────────────────────────────────────────── */
 
 export default function EditPost() {
@@ -46,6 +44,18 @@ export default function EditPost() {
   const [mediaFile, setMediaFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
 
+  // Inject the DatePicker CSS only in the browser
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/react-datepicker/dist/react-datepicker.css';
+    document.head.appendChild(link);
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
+
   /* ── Quill config ── */
   const quillModules = {
     toolbar: [
@@ -61,8 +71,8 @@ export default function EditPost() {
     keyboard: true,
   };
   const quillFormats = [
-    'font', 'size', 'bold', 'italic', 'underline', 'strike',
-    'color', 'background', 'script', 'header', 'align',
+    'font','size','bold','italic','underline','strike',
+    'color','background','script','header','align',
   ];
 
   /* ── fetch post once we have an id ── */
@@ -94,7 +104,7 @@ export default function EditPost() {
       setMediaFile(file);
       setPreviewUrl(URL.createObjectURL(file));
     } else {
-      setFormData((p) => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
+      setFormData(p => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
     }
   };
 
@@ -140,7 +150,6 @@ export default function EditPost() {
   return (
     <Container className="mt-5">
       <h2>Edit Post</h2>
-
       {status.error && <Alert variant="danger">{status.error}</Alert>}
 
       <Form onSubmit={handleSubmit}>
@@ -239,7 +248,7 @@ export default function EditPost() {
         {formData.include_date && (
           <ReactDatePicker
             selected={formData.date ? new Date(formData.date) : null}
-            onChange={(date) => setFormData((p) => ({ ...p, date }))}
+            onChange={date => setFormData(p => ({ ...p, date }))}
             dateFormat="yyyy-MM-dd"
             className="form-control mb-3"
           />
@@ -263,7 +272,7 @@ export default function EditPost() {
             modules={quillModules}
             formats={quillFormats}
             value={formData.description}
-            onChange={(v) => setFormData((p) => ({ ...p, description: v }))}
+            onChange={v => setFormData(p => ({ ...p, description: v }))}
           />
         </Form.Group>
 
