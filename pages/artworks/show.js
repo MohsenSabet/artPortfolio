@@ -4,6 +4,7 @@ import { Container, Row, Col, Button } from 'react-bootstrap';
 import Link from 'next/link';
 import ArtworkCard from '@/components/ArtworkCard';
 import { supabase } from '@/lib/supabaseClient';
+import { FaArrowLeft } from 'react-icons/fa';
 import styles from '@/styles/Show.module.css';
 
 // client-only sunset shader background
@@ -47,16 +48,20 @@ export default function ArtworksByMedium({ posts, medium }) {
     <>
       <SunsetBackground />
       <Container className="py-4">
-        <Link href="/artworks" passHref>
-          
-        </Link>
+        {/* Back to categories button */}
+        <div className={styles.backContainer}>
+          <Link href="/artworks" className={styles.backButton}>
+            <FaArrowLeft className={styles.backIcon} />
+            <span>Back to ArtWorks</span>
+          </Link>
+        </div>
         <h1 className={`mb-4 ${styles.title}`}>{medium}</h1>
         {/* Main featured artwork */}
         <Row className="justify-content-center mb-0">
           <Col md={4} className="text-center">
             {/* scale down featured artwork to avoid vertical scroll */}
             <div style={{ display: 'inline-block', transform: 'scale(1)', transformOrigin: 'top center', opacity: fadeIn ? 1 : 0, transition: 'opacity 0.5s ease-in-out' }}>
-              <ArtworkCard post={posts[selectedIndex]} fadeIn={fadeIn} />
+              <ArtworkCard post={posts[selectedIndex]} fadeIn={fadeIn} medium={medium} />
             </div>
           </Col>
         </Row>

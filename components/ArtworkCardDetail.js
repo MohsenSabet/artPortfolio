@@ -4,6 +4,8 @@ import Link from 'next/link';
 import styles from './ArtworkCardDetail.module.css';
 
 export default function ArtworkCardDetail({ post }) {
+  // Extract author profile (Supabase returns related rows as an array)
+  const author = Array.isArray(post.profiles) ? post.profiles[0] : post.profiles || {};
   const {
     title,
     media_url,
@@ -14,7 +16,6 @@ export default function ArtworkCardDetail({ post }) {
     include_time,
     time,
     featured,
-    profiles: author,
     description
   } = post;
   const dateDisplay = include_date && date
@@ -51,12 +52,12 @@ export default function ArtworkCardDetail({ post }) {
           </div>
           <div className={styles.authorSection}>
             <img
-              src={author?.avatar_url || '/window.svg'}
+              src={author.avatar_url || '/window.svg'}
               alt={`${author?.first_name || ''} ${author?.last_name || ''}`}
               className={styles.avatarLarge}
             />
             <div>
-              <div className="fw-bold">{author?.username || `${author?.first_name} ${author?.last_name}`}</div>
+              <div className="fw-bold">{author.username || `${author.first_name || ''} ${author.last_name || ''}`}</div>
               {(dateDisplay || timeDisplay) && (
                 <div className="text-muted small">{dateDisplay} {timeDisplay}</div>
               )}

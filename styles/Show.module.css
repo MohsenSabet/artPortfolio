@@ -21,3 +21,31 @@
   transform: translateX(-50%);
   border-radius: 2px;
 }
+
+/* Back button container */
+.backContainer {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+/* Glassy back button */
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateX(-3px);
+}
+/* Back icon */
+.backIcon {
+  margin-right: 0.5rem;
+}

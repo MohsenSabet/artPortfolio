@@ -13,7 +13,7 @@ function formatDate(dateStr) {
   return `${y}-${m}-${day}`;
 }
 
-export default function ArtworkCard({ post }) {
+export default function ArtworkCard({ post, medium }) {
   const {
     id,
     title,
@@ -34,7 +34,7 @@ export default function ArtworkCard({ post }) {
 
   return (
     <Card className={styles.artworkCard}>
-      <Link href={`/artworks/${id}`}>  
+      <Link href={`/artworks/${id}?medium=${medium || 'All'}`}>  
         <div className={styles.mediaContainer}>
           {isVideo ? (
             <video controls src={media_url} />
