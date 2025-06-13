@@ -14,6 +14,7 @@ function formatDate(dateStr) {
 }
 
 export default function ArtworkCard({ post, medium }) {
+  if (!post) return <div className="text-center text-muted">Artwork not found.</div>;
   const {
     id,
     title,
@@ -34,14 +35,17 @@ export default function ArtworkCard({ post, medium }) {
 
   return (
     <Card className={styles.artworkCard}>
-      <Link href={`/artworks/${id}?medium=${medium || 'All'}`}>  
+      <Link href={{ pathname: `/artworks/${id}`, query: { medium: medium || 'All' } }}>  
         <div className={styles.mediaContainer}>
           {isVideo ? (
-            <video controls src={media_url} />
+            <video controls src={media_url} controlsList="nodownload" onContextMenu={e => e.preventDefault()} />
           ) : (
             <img
               src={media_url}
               alt={title}
+              draggable="false"
+              onDragStart={e => e.preventDefault()}
+              onContextMenu={e => e.preventDefault()}
               onError={(e) => { e.currentTarget.src = '/file.svg'; }}
             />
           )}

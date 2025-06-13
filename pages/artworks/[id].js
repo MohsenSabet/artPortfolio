@@ -45,7 +45,7 @@ export default function ArtworkDetailPage({ post, prev, next }) {
       {/* Back to category listing */}
       <div className={detailStyles.backContainer}>
         <Link
-          href={`/artworks/show?medium=${medium || 'All'}`}
+          href={{ pathname: '/artworks/show', query: { medium: medium || 'All' } }}
           className={detailStyles.backButton}
         >
           <FaArrowLeft size={24} />

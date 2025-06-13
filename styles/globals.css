@@ -130,11 +130,20 @@ a {
 .loader-dots span:nth-child(2) { animation-delay: -0.12s; }
 .loader-dots span:nth-child(3) { animation-delay: 0; }
 
-/* Prevent image dragging and selection */
+/* Prevent image dragging, selection, and right-click */
 img {
-  -webkit-user-drag: none;
-  -khtml-user-drag: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
+  -webkit-user-drag: none !important;
+  -khtml-user-drag: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+}
+
+/* Hide images when printing */
+@media print {
+  img {
+    visibility: hidden !important;
+  }
 }

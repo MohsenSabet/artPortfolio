@@ -32,11 +32,19 @@ export default function ArtworkCardDetail({ post }) {
       <div className={styles.detailCard}>
         <div className={styles.media}>
           {isVideo ? (
-            <video controls src={media_url} />
+            <video
+              controls
+              controlsList="nodownload"
+              onContextMenu={e => e.preventDefault()}
+              src={media_url}
+            />
           ) : (
             <img
               src={media_url}
               alt={title}
+              draggable="false"
+              onDragStart={e => e.preventDefault()}
+              onContextMenu={e => e.preventDefault()}
               onError={(e) => { e.currentTarget.src = '/file.svg'; }}
             />
           )}

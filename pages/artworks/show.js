@@ -56,12 +56,16 @@ export default function ArtworksByMedium({ posts, medium }) {
           </Link>
         </div>
         <h1 className={`mb-4 ${styles.title}`}>{medium}</h1>
-        {/* Main featured artwork */}
+        {/* Main featured artwork or fallback */}
         <Row className="justify-content-center mb-0">
           <Col md={4} className="text-center">
             {/* scale down featured artwork to avoid vertical scroll */}
             <div style={{ display: 'inline-block', transform: 'scale(1)', transformOrigin: 'top center', opacity: fadeIn ? 1 : 0, transition: 'opacity 0.5s ease-in-out' }}>
-              <ArtworkCard post={posts[selectedIndex]} fadeIn={fadeIn} medium={medium} />
+              {posts && posts.length > 0 && posts[selectedIndex] ? (
+                <ArtworkCard post={posts[selectedIndex]} fadeIn={fadeIn} medium={medium} />
+              ) : (
+                <p className="text-center text-muted">No artwork available.</p>
+              )}
             </div>
           </Col>
         </Row>
