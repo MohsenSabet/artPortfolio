@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, } from 'react';
 import { motion, animate, AnimatePresence } from 'framer-motion';
 import { bgSpeed } from '@/lib/bgSpeed';
 import Link from 'next/link';
@@ -9,7 +9,17 @@ import Image from 'next/image';
 export default function Home() {
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
-    
+    const [isMobile, setIsMobile] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
+
+    // detect mobile viewport
+    useEffect(() => {
+      const handleResize = () => setIsMobile(window.innerWidth <= 768);
+      handleResize();
+      window.addEventListener('resize', handleResize);
+      return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
    // Menu button variants and options
    const menuVariants = {
      open: {
@@ -39,28 +49,35 @@ export default function Home() {
    ];
 
     return (
-      <div
-        style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}
-      >
+     <div
+       style={{ position: 'relative', height: '100vh', overflow: 'hidden' }}
+     >
        {/* Combined nebula + reflective globe rendered via Three Fiber */}
        <CombinedScene />
 
       {/* Centered Menu Button */}
       <div style={{
-        position: 'absolute', top: '50%', left: '50%',
-        transform: 'translate(-50%, -60%)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3
-      }}>
-        <motion.div
-          style={{
-            position: 'relative', width: 250, height: 250, borderRadius: '50%', overflow: 'visible',
-            display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer',
-            border: '2px solid rgba(255, 255, 255, 0)'
-          }}
-          variants={menuVariants} initial="closed" whileHover="open"
-          onHoverStart={() => animate(bgSpeed, 10, { duration: 0.6 })}
-          onHoverEnd={() => animate(bgSpeed, 0.2, { duration: 0.5 })}
-        >
+         position: 'absolute', top: '50%', left: '50%',
+         transform: isMobile ? 'translate(-50%, -50%)' : 'translate(-50%, -60%)',
+         display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3
+       }}>
+         <motion.div
+           style={{
+            position: 'relative',
+            width: isMobile ? 180 : 250,
+            height: isMobile ? 180 : 250,
+            borderRadius: '50%', overflow: 'visible',
+             display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer',
+             border: '2px solid rgba(255, 255, 255, 0)'
+           }}
+           variants={menuVariants} initial="closed"
+           {...(isMobile
+             ? { animate: menuOpen ? 'open' : 'closed', onClick: () => setMenuOpen(prev => !prev) }
+             : { whileHover: 'open' }
+           )}
+           onHoverStart={() => animate(bgSpeed, 10, { duration: 0.6 })}
+           onHoverEnd={() => animate(bgSpeed, 0.2, { duration: 0.5 })}
+         >
           {/* Clickable menu trigger (transparent circle) */}
           <motion.div variants={{ open: {}, closed: {} }} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1 }}>
             <motion.div variants={{ open: { opacity: 0 }, closed: { opacity: 1 } }} transition={{ duration: 0.3 }} style={{ pointerEvents: 'none' }}>
@@ -86,40 +103,40 @@ export default function Home() {
               <Image src="/images/home/Ufo3.PNG" alt="UFO3" width={260} height={260} />
             </motion.div>
           </motion.div>
-          {/* Three buttons around the globe on hover */}
-          {options.map((option, idx) => {
-            const angles = [-90, 30, 150];
-            const angle = angles[idx % angles.length];
-            const rad = angle * (Math.PI / 180);
-            const radius = 180;
-            const x = Math.cos(rad) * radius;
-            const y = Math.sin(rad) * radius;
-            return (
-              <motion.div
-                key={option.label}
-                style={{
-                  position: 'absolute', top: '50%', left: '50%',
-                  transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
-                  background: 'rgba(255, 255, 255, 0.22)',
-                  backdropFilter: 'blur(10px)',
-                  WebkitBackdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  borderRadius: '50%',
-                  width: 80, height: 80,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: '0 8px 16px rgba(0, 0, 0, 0)',
-                  cursor: 'pointer'
-                }}
-                variants={itemVariants}
-              >
-                <Link href={option.href} style={{ color: '#000', textDecoration: 'none' }}>
-                  {option.label}
-                </Link>
-              </motion.div>
-            );
-          })}
-        </motion.div>
-      </div>
+           {/* Three buttons around the globe on hover */}
+           {options.map((option, idx) => {
+             const angles = [-90, 30, 150];
+             const angle = angles[idx % angles.length];
+             const rad = angle * (Math.PI / 180);
+             const radius = isMobile ? 120 : 180;
+             const x = Math.cos(rad) * radius;
+             const y = Math.sin(rad) * radius;
+             return (
+               <motion.div
+                 key={option.label}
+                 style={{
+                   position: 'absolute', top: '50%', left: '50%',
+                   transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
+                   background: 'rgba(255, 255, 255, 0.22)',
+                   backdropFilter: 'blur(10px)',
+                   WebkitBackdropFilter: 'blur(10px)',
+                   border: '1px solid rgba(255, 255, 255, 0.12)',
+                   borderRadius: '50%',
+                   width: 80, height: 80,
+                   display: 'flex', alignItems: 'center', justifyContent: 'center',
+                   boxShadow: '0 8px 16px rgba(0, 0, 0, 0)',
+                   cursor: 'pointer'
+                 }}
+                 variants={itemVariants}
+               >
+                 <Link href={option.href} style={{ color: '#000', textDecoration: 'none', fontSize: isMobile? '0.8rem':'1rem' }}>
+                   {option.label}
+                 </Link>
+               </motion.div>
+             );
+           })}
+         </motion.div>
+       </div>
      </div>
    );
 }
