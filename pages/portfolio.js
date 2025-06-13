@@ -223,23 +223,7 @@ export default function Portfolio({ posts, profile }) {
             {profile.first_name} {profile.last_name}
             {profile.pronouns && ` (${profile.pronouns})`}
           </h3>
-          {profile.mediums && (
-            <p><strong>Mediums:</strong> {profile.mediums}</p>
-          )}
-          {profile.bio && <p>{profile.bio}</p>}
-          {(profile.twitter || profile.instagram || profile.linkedin) && (
-            <div className="artist-socials">
-              {profile.twitter && (
-                <a href={profile.twitter} target="_blank" rel="noopener noreferrer">Twitter</a>
-              )}
-              {profile.instagram && (
-                <a href={profile.instagram} target="_blank" rel="noopener noreferrer">Instagram</a>
-              )}
-              {profile.linkedin && (
-                <a href={profile.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
-              )}
-            </div>
-          )}
+          {profile.portfolio_intro && <p>{profile.portfolio_intro}</p>}
           <a href="/about" className="about-link">Learn more about the artist &rarr;</a>
         </div>
       )}
@@ -272,10 +256,10 @@ export async function getServerSideProps() {
 
   if (error) console.error("Error fetching featured posts:", error.message);
 
-  // fetch artist profile info
+  // fetch artist profile intro only
   const { data: profiles, error: profileError } = await supabase
     .from("profiles")
-    .select("first_name,last_name,pronouns,avatar_url,mediums,bio,twitter,instagram,linkedin");
+    .select("first_name,last_name,pronouns,avatar_url,portfolio_intro");
   if (profileError) console.error("Error fetching profile:", profileError.message);
   const profile = profiles?.[0] || null;
 

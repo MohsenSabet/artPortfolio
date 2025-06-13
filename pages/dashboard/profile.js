@@ -69,6 +69,12 @@ export default function AdminProfile() {
                 <h5>Biography</h5>
                 <Card.Text>{profile.bio}</Card.Text>
               </div>
+              {profile.portfolio_intro && (
+                <div className="mb-4">
+                  <h5>Portfolio Introduction</h5>
+                  <Card.Text>{profile.portfolio_intro}</Card.Text>
+                </div>
+              )}
               <div>
                 <h5>Mediums</h5>
                 <div>

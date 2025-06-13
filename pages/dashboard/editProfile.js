@@ -25,6 +25,7 @@ export default function EditProfile() {
   const [instagram, setInstagram] = useState('');
   const [mediums, setMediums] = useState([]);
   const [newMedium, setNewMedium] = useState('');
+  const [portfolioIntro, setPortfolioIntro] = useState('');
   const [userId, setUserId] = useState(null);
   // Password change state (inline)
   const [newPassword, setNewPassword] = useState('');
@@ -69,6 +70,7 @@ export default function EditProfile() {
         setLinkedIn(data.linkedin || '');
         setInstagram(data.instagram || '');
         setMediums(data.mediums ? data.mediums.split(',') : []);
+        setPortfolioIntro(data.portfolio_intro || '');
       }
       setLoading(false);
     }
@@ -132,7 +134,8 @@ export default function EditProfile() {
       twitter,
       linkedin: linkedIn,
       instagram,
-      mediums: mediums.join(',')
+      mediums: mediums.join(','),
+      portfolio_intro: portfolioIntro
     };
     const { data: updated, error } = await supabase
       .from('profiles')
@@ -267,6 +270,16 @@ export default function EditProfile() {
                 rows={3}
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group controlId="portfolioIntro" className="mb-3">
+              <Form.Label>Portfolio Introduction</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={2}
+                value={portfolioIntro}
+                onChange={(e) => setPortfolioIntro(e.target.value)}
+                placeholder="Short introduction for portfolio page"
               />
             </Form.Group>
 
