@@ -17,6 +17,11 @@ const TunnelBackground = dynamic(
 
 export default function Portfolio({ posts }) {
   const [showBackBtn, setShowBackBtn] = useState(false);
+  // helper to format custom post date consistently
+  const formatDate = (dateStr) => {
+    const d = new Date(dateStr);
+    return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+  };
 
   /* --- slide-by-slide animation (no scrubbing) --- */
   useEffect(() => {
@@ -201,6 +206,9 @@ export default function Portfolio({ posts }) {
             )}
             <div className="slide-text">
               <h2>{post.title}</h2>
+              {post.date && (
+                <p className="slide-date">{formatDate(post.date)}</p>
+              )}
               <div
                 className="slide-desc"
                 dangerouslySetInnerHTML={{ __html: post.description }}
@@ -231,12 +239,12 @@ export async function getServerSideProps() {
   const { data, error } = await supabase
     .from("posts")
     .select(
-      "id,title,description,media_url,category,featured,privacy,profiles(id,username,avatar_url)"
+      "id,title,description,media_url,category,featured,privacy,date,profiles(id,username,avatar_url)"
     )
     .eq("featured", true)
     .eq("privacy", "Public")
-    .order("category", { ascending: true })
-    .order("created_at", { ascending: true });
+    .order("category", { ascending: false })
+    .order("date", { ascending: true });
 
   if (error) console.error("Error fetching featured posts:", error.message);
 

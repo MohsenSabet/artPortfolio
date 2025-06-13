@@ -57,6 +57,15 @@ export default function EditPost() {
     const { data: { session } } = await supabase.auth.getSession();
     // if new file selected, upload to storage
     if (mediaFile && session) {
+      // delete old file from storage
+      if (formData.media_url && formData.media_url.includes('/posts/')) {
+        const oldPath = formData.media_url.split('/posts/')[1];
+        const { error: deleteError } = await supabase.storage.from('posts').remove([oldPath]);
+        if (deleteError) {
+          setStatus({ loading: false, error: deleteError.message });
+          return;
+        }
+      }
       const fileExt = mediaFile.name.split('.').pop();
       const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
       const { error: uploadError } = await supabase.storage.from('posts').upload(fileName, mediaFile);
@@ -101,19 +110,24 @@ export default function EditPost() {
               <Form.Label>Category</Form.Label>
               <Form.Select name="category" value={formData.category} onChange={handleChange}>
                  <option>Painting</option>
-              <option>Illustration</option>
-              <option>Photography</option>
-              <option>Digital</option>
-              <option>Other</option>
-              <option>Life & Gesture Study</option>        {/* hands, poses, anatomy sketches */}
-              <option>Character & Creature</option>        {/* stylized faces, animals, hybrids */}
-              <option>Environment & Worldbuilding</option>  {/* castles, courtyards, landscapes */}
-              <option>Concept & Experimental</option>      {/* “Process!”, abstract sketches */}
-              <option>Watercolor Study</option>            {/* whales, gannets, landscapes */}
-              <option>Ink & Linework</option>              {/* fineliner portraits, texture studies */}   <option>Marker Illustration</option>         {/* bold marker portraits series */}
-              <option>Traditional Mixed Media</option>     {/* pencil + pen + color mixtures */}
-              <option>Digital Illustration</option>        {/* any purely digital pieces */}
-              <option>Other</option>
+                  <option>Illustration</option>
+                  <option>Photography</option>
+                  <option>Digital</option>
+                  <option>Life & Gesture Study</option>        {/* hands, poses, anatomy sketches */}
+                  <option>Character & Creature</option>        {/* stylized faces, animals, hybrids */}
+                  <option>Environment & Worldbuilding</option>  {/* castles, courtyards, landscapes */}
+                  <option>Concept & Experimental</option>      {/* “Process!”, abstract sketches */}
+                  <option>Watercolor Study</option>            {/* whales, gannets, landscapes */}
+                  <option>Ink & Linework</option>              {/* fineliner portraits, texture studies */}   <option>Marker Illustration</option>         {/* bold marker portraits series */}
+                  <option>Traditional Mixed Media</option>     {/* pencil + pen + color mixtures */}
+                  <option>Digital Illustration</option> 
+                  <option>Gesture & Life Study</option>
+                  <option>Character & Creature</option>
+                  <option>Environment & World-building</option>
+                  <option>Colour & Rendering</option>
+                  <option>Concept / Experimental</option>
+                           {/* any purely digital pieces */}
+                  <option>Other</option>
               </Form.Select>
             </Form.Group>
           </Col>

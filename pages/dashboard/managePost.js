@@ -16,8 +16,9 @@ export default function ManagePost() {
       const userId = session.user.id;
       const { data, error } = await supabase
         .from('posts')
-        .select('id,title,created_at,media_url,privacy,featured')
+        .select('id,title,created_at,media_url,privacy,featured,category')
         .eq('author_id', userId)
+        .order('category', { ascending: true })
         .order('created_at', { ascending: false });
       if (error) setError(error.message);
       else setPosts(data);
@@ -37,9 +38,39 @@ export default function ManagePost() {
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this post?')) return;
+    // delete image file from storage
+    const postToDelete = posts.find(p => p.id === id);
+    if (postToDelete?.media_url && postToDelete.media_url.includes('/posts/')) {
+      const oldPath = postToDelete.media_url.split('/posts/')[1];
+      const { error: deleteError } = await supabase.storage.from('posts').remove([oldPath]);
+      if (deleteError) {
+        setError(deleteError.message);
+        return;
+      }
+    }
     const { error } = await supabase.from('posts').delete().eq('id', id);
     if (error) setError(error.message);
     else setPosts(posts.filter((p) => p.id !== id));
+  };
+
+  // add handlers for quick toggles
+  const handleToggleFeatured = async (id, currentFeatured) => {
+    const { error } = await supabase
+      .from('posts')
+      .update({ featured: !currentFeatured })
+      .eq('id', id);
+    if (error) setError(error.message);
+    else setPosts(posts.map(p => p.id === id ? { ...p, featured: !currentFeatured } : p));
+  };
+
+  const handleTogglePrivacy = async (id, currentPrivacy) => {
+    const newPrivacy = currentPrivacy === 'Public' ? 'Private' : 'Public';
+    const { error } = await supabase
+      .from('posts')
+      .update({ privacy: newPrivacy })
+      .eq('id', id);
+    if (error) setError(error.message);
+    else setPosts(posts.map(p => p.id === id ? { ...p, privacy: newPrivacy } : p));
   };
 
   return (
@@ -58,6 +89,7 @@ export default function ManagePost() {
           <tr>
             <th>Thumbnail</th>
             <th>Title</th>
+            <th>Category</th>
             <th>Date</th>
             <th>Actions</th>
           </tr>
@@ -73,8 +105,17 @@ export default function ManagePost() {
                 />
               </td>
               <td>{p.title}</td>
+              <td>{p.category}</td>
               <td>{new Date(p.created_at).toLocaleDateString()}</td>
               <td>
+                {/* quick action buttons */}
+                <Button size="sm" variant={p.featured ? 'outline-info' : 'info'} onClick={() => handleToggleFeatured(p.id, p.featured)}>
+                  {p.featured ? 'Unfeature' : 'Feature'}
+                </Button>{' '}
+                <Button size="sm" variant={p.privacy === 'Public' ? 'outline-warning' : 'outline-success'} onClick={() => handleTogglePrivacy(p.id, p.privacy)}>
+                  {p.privacy === 'Public' ? 'Make Private' : 'Make Public'}
+                </Button>{' '}
+                {/* existing Edit/Delete buttons */}
                 <Button size="sm" variant="outline-primary" onClick={() => router.push(`/dashboard/editPost?id=${p.id}`)}>Edit</Button>{' '}
                 <Button size="sm" variant="outline-danger" onClick={() => handleDelete(p.id)}>Delete</Button>
               </td>

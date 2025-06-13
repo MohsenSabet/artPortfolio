@@ -169,19 +169,22 @@ export default function AddPost() {
             <Form.Label className="me-2 mb-0 text-dark">Category</Form.Label>
             <Form.Select size="sm" name="category" value={formData.category} onChange={handleChange}>
               <option>Painting</option>
-              <option>Illustration</option>
-              <option>Photography</option>
-              <option>Digital</option>
-              <option>Other</option>
-              <option>Life & Gesture Study</option>        {/* hands, poses, anatomy sketches */}
-              <option>Character & Creature</option>        {/* stylized faces, animals, hybrids */}
-              <option>Environment & Worldbuilding</option>  {/* castles, courtyards, landscapes */}
-              <option>Concept & Experimental</option>      {/* “Process!”, abstract sketches */}
-              <option>Watercolor Study</option>            {/* whales, gannets, landscapes */}
-              <option>Ink & Linework</option>              {/* fineliner portraits, texture studies */}   <option>Marker Illustration</option>         {/* bold marker portraits series */}
-              <option>Traditional Mixed Media</option>     {/* pencil + pen + color mixtures */}
-              <option>Digital Illustration</option>        {/* any purely digital pieces */}
-              <option>Other</option>
+                  <option>Illustration</option>
+                  <option>Photography</option>
+                  <option>Digital</option>
+                  <option>Life & Gesture Study</option>        {/* hands, poses, anatomy sketches */}
+                  <option>Character & Creature</option>        {/* stylized faces, animals, hybrids */}
+                  <option>Environment & Worldbuilding</option>  {/* castles, courtyards, landscapes */}
+                  <option>Concept & Experimental</option>      {/* “Process!”, abstract sketches */}
+                  <option>Watercolor Study</option>            {/* whales, gannets, landscapes */}
+                  <option>Ink & Linework</option>              {/* fineliner portraits, texture studies */}   <option>Marker Illustration</option>         {/* bold marker portraits series */}
+                  <option>Traditional Mixed Media</option>     {/* pencil + pen + color mixtures */}
+                  <option>Digital Illustration</option> 
+                  <option>Gesture & Life Study</option>
+                  <option>Character & Creature</option>
+                  <option>Environment & World-building</option>
+                  <option>Colour & Rendering</option>
+                  <option>Concept / Experimental</option>
             </Form.Select>
           </Form.Group>
           <Form.Check className="ms-4 text-dark mb-2" type="checkbox" label="Include Date" name="includeDate" checked={formData.includeDate} onChange={handleChange} />
