@@ -1,18 +1,21 @@
-// pages/dashboard/editPost.js
+/* ──────────────────────────────────────────────────────────────
+   File: pages/dashboard/editPost.js
+   Updated: fixes “document is not defined” on Vercel build
+────────────────────────────────────────────────────────────── */
+
 import { useState, useEffect } from 'react';
 import { Form, Button, Row, Col, Alert, Container } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabaseClient';
 import dynamic from 'next/dynamic';
+
+/* ── browser-only widgets ───────────────────────────────────── */
+const ReactQuill      = dynamic(() => import('react-quill-new'), { ssr: false });
+const ReactDatePicker = dynamic(() => import('react-datepicker'),  { ssr: false });
+
 import 'react-quill-new/dist/quill.snow.css';
-
-const ReactQuill = dynamic(async () => {
-  return import('react-quill-new');
-}, { ssr: false });
-
-const ReactDatePicker = dynamic(() => import('react-datepicker'), { ssr: false });
 import 'react-datepicker/dist/react-datepicker.css';
-/* ─────────────────────────────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────── */
 
 function EditPost() {
   const router = useRouter();
@@ -58,7 +61,12 @@ function EditPost() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return router.push('/login');
 
-      const { data, error } = await supabase.from('posts').select('*').eq('id', id).single();
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('id', id)
+        .single();
+
       if (error) setStatus({ loading: false, error: error.message });
       else {
         setFormData(data);
@@ -67,7 +75,7 @@ function EditPost() {
     })();
   }, [id, router]);
 
-  /* ── handlers ── */
+  /* ── handlers ─ */
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((p) => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
@@ -96,16 +104,22 @@ function EditPost() {
     if (mediaFile) {
       if (mediaUrl?.includes('/posts/')) {
         const oldPath = mediaUrl.split('/posts/')[1];
-        await supabase.storage.from('posts').remove([oldPath]).catch(() => {/* ignore */});
+        await supabase.storage.from('posts').remove([oldPath]).catch(() => {});
       }
-      const ext = mediaFile.name.split('.').pop();
+      const ext      = mediaFile.name.split('.').pop();
       const fileName = `${session.user.id}/${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage.from('posts').upload(fileName, mediaFile);
+      const { error: uploadError } =
+        await supabase.storage.from('posts').upload(fileName, mediaFile);
       if (uploadError) {
         setStatus({ loading: false, error: uploadError.message });
         return;
       }
-      mediaUrl = supabase.storage.from('posts').getPublicUrl(fileName).data.publicUrl;
+      mediaUrl = supabase
+        .storage
+        .from('posts')
+        .getPublicUrl(fileName)
+        .data
+        .publicUrl;
     }
 
     /* update row */
@@ -118,7 +132,7 @@ function EditPost() {
     else router.push('/dashboard/managePost');
   };
 
-  /* ── render ── */
+  /* ── render ─ */
   return (
     <Container className="mt-5">
       <h2>Edit Post</h2>
@@ -129,13 +143,21 @@ function EditPost() {
         {/* title */}
         <Form.Group controlId="title" className="mb-3">
           <Form.Label>Title</Form.Label>
-          <Form.Control name="title" value={formData.title} onChange={handleChange} />
+          <Form.Control
+            name="title"
+            value={formData.title}
+            onChange={handleChange}
+          />
         </Form.Group>
 
         {/* media */}
         <Form.Group controlId="media" className="mb-3">
           <Form.Label>Media File</Form.Label>
-          <Form.Control type="file" accept="image/*,video/*" onChange={handleFileChange} />
+          <Form.Control
+            type="file"
+            accept="image/*,video/*"
+            onChange={handleFileChange}
+          />
         </Form.Group>
 
         {previewUrl && (
@@ -161,8 +183,11 @@ function EditPost() {
           <Col md={6}>
             <Form.Group controlId="category">
               <Form.Label>Category</Form.Label>
-              <Form.Select name="category" value={formData.category} onChange={handleChange}>
-                {/* (same category list) */}
+              <Form.Select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+              >
                 <option>Painting</option>
                 <option>Illustration</option>
                 <option>Photography</option>
@@ -186,7 +211,11 @@ function EditPost() {
           <Col md={6}>
             <Form.Group controlId="privacy">
               <Form.Label>Privacy</Form.Label>
-              <Form.Select name="privacy" value={formData.privacy} onChange={handleChange}>
+              <Form.Select
+                name="privacy"
+                value={formData.privacy}
+                onChange={handleChange}
+              >
                 <option>Public</option>
                 <option>Private</option>
                 <option>Unlisted</option>
@@ -242,5 +271,11 @@ function EditPost() {
   );
 }
 
-/* ── export ──────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────
+   Prevent static optimisation so build never runs the component
+────────────────────────────────────────────────────────────── */
+export async function getServerSideProps() {
+  return { props: {} };
+}
+
 export default EditPost;
