@@ -4,15 +4,10 @@ import { Form, Button, Row, Col, Alert, Container } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabaseClient';
 import dynamic from 'next/dynamic';
+import 'react-quill-new/dist/quill.snow.css';
 
-/* ── Browser-only widgets ────────────────────────────────── */
 const ReactQuill = dynamic(async () => {
-  const { default: Quill } = await import('react-quill-new');
-  if (typeof window !== 'undefined') {
-    // theme JS touches document.*, so load it only in the browser
-    await import('react-quill-new/dist/quill.snow.css');
-  }
-  return Quill;
+  return import('react-quill-new');
 }, { ssr: false });
 
 const ReactDatePicker = dynamic(() => import('react-datepicker'), { ssr: false });
