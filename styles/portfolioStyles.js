@@ -225,6 +225,37 @@ const portfolioStyles = css.global`
   .about-link:hover {
     border-color: #fff;
   }
+
+  @media (max-width: 768px) {
+    /* responsive mobile adjustments */
+    .post-slide {
+      flex-direction: column !important;
+      align-items: flex-start;
+      padding: 1rem;
+      height: auto;
+      min-height: 100vh;
+    }
+    .slide-image {
+      max-width: 100%;
+      max-height: 40vh;
+      width: 100%;
+      object-fit: contain;
+      margin-bottom: 1rem;
+    }
+    .slide-text {
+      width: 100%;
+    }
+    .slide-text h2 {
+      font-size: 2rem;
+    }
+    .vertical-ribbon-wrapper,
+    .category-label-wrapper {
+      display: none;
+    }
+    .slide-indicator {
+      font-size: 2rem;
+    }
+  }
 `;
 
 export default portfolioStyles;
