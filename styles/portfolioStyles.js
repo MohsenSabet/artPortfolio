@@ -192,8 +192,12 @@ const portfolioStyles = css.global`
       flex-direction: column;
       padding: 1.5rem;
     }
+    /* override any row-reverse on odd slides */
+    .post-slide:nth-child(odd) {
+      flex-direction: column;
+    }
     .slide-text {
-      width: 80%;
+      width: 100%;
       margin-top: 1rem;
     }
     .slide-text h2 {
@@ -206,13 +210,17 @@ const portfolioStyles = css.global`
       display: none;
     }
     .slide-image {
-      width: 70%;
+      width: 100%;
       max-height: none;
     }
   }
   @media (max-width: 600px) {
     .post-slide {
       padding: 1rem;
+    }
+    /* ensure odd slides also column */
+    .post-slide:nth-child(odd) {
+      flex-direction: column;
     }
     .slide-text {
       width: 100%;
