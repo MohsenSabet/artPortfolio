@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/router';
-import { Container, Row, Col, Card, Button, Spinner, Alert, ProgressBar, ListGroup } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button, Spinner, Alert, ProgressBar, ListGroup, Pagination } from 'react-bootstrap';
 import { FaPlus, FaUserEdit, FaTasks, FaClipboardList, FaGlobe, FaLock, FaStar, FaImage, FaCalendarAlt, FaEye, FaEdit, FaTrash } from 'react-icons/fa';
 import styles from '@/styles/Dashboard.module.css';
 
@@ -14,6 +14,8 @@ export default function DashboardHome() {
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -71,6 +73,9 @@ export default function DashboardHome() {
       default: return posts;
     }
   })();
+  // Pagination calculations
+  const totalPages = Math.ceil(displayedPosts.length / pageSize);
+  const paginatedPosts = displayedPosts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   // Profile completeness calculation
   const totalFields = 4;
   const filledFields = ['first_name', 'last_name', 'avatar_url', 'bio'].reduce((acc, field) => profile[field] ? acc + 1 : acc, 0);
@@ -85,6 +90,11 @@ export default function DashboardHome() {
     if (error) return setError(error.message);
     setPosts(posts.filter(p => p.id !== id));
   };
+  // reset page when filter changes
+  const handleFilterChange = (newFilter) => {
+    setFilter(newFilter);
+    setCurrentPage(1);
+  };
 
   return (
     <Container className="py-4">
@@ -93,7 +103,7 @@ export default function DashboardHome() {
         <Col md={3} sm={6} className="mb-3">
           <Card
             className={`${styles.glassCard} h-100 ${filter === 'all' ? styles.gradientAll : ''}`}
-            onClick={() => setFilter('all')}
+            onClick={() => handleFilterChange('all')}
           >
             <Card.Body className="d-flex flex-column justify-content-center">
               <Card.Title><FaClipboardList className="me-2" />Total Posts</Card.Title>
@@ -104,7 +114,7 @@ export default function DashboardHome() {
         <Col md={3} sm={6} className="mb-3">
           <Card
             className={`${styles.glassCard} h-100 ${filter === 'public' ? styles.gradientPublic : ''}`}
-            onClick={() => setFilter('public')}
+            onClick={() => handleFilterChange('public')}
           >
             <Card.Body className="d-flex flex-column justify-content-center">
               <Card.Title><FaGlobe className="me-2" />Public Posts</Card.Title>
@@ -115,7 +125,7 @@ export default function DashboardHome() {
         <Col md={3} sm={6} className="mb-3">
           <Card
             className={`${styles.glassCard} h-100 ${filter === 'private' ? styles.gradientPrivate : ''}`}
-            onClick={() => setFilter('private')}
+            onClick={() => handleFilterChange('private')}
           >
             <Card.Body className="d-flex flex-column justify-content-center">
               <Card.Title><FaLock className="me-2" />Private Posts</Card.Title>
@@ -126,7 +136,7 @@ export default function DashboardHome() {
         <Col md={3} sm={6} className="mb-3">
           <Card
             className={`${styles.glassCard} h-100 ${filter === 'featured' ? styles.gradientFeatured : ''}`}
-            onClick={() => setFilter('featured')}
+            onClick={() => handleFilterChange('featured')}
           >
             <Card.Body className="d-flex flex-column justify-content-center">
               <Card.Title><FaStar className="me-2" />Featured Posts</Card.Title>
@@ -204,34 +214,48 @@ export default function DashboardHome() {
               {displayedPosts.length === 0 ? (
                 <p className="text-center text-muted">No posts found for this filter.</p>
               ) : (
-                <table className={styles.dashboardTable}>
-                  <thead>
-                    <tr>
-                      <th><FaImage className="me-1" />Thumbnail</th>
-                      <th><FaEdit className="me-1" />Title</th>
-                      <th><FaCalendarAlt className="me-1" />Date</th>
-                      <th><FaTasks className="me-1" />Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {displayedPosts.map(post => (
-                      <tr key={post.id}>
-                        <td><img src={post.media_url} alt={post.title} style={{ width: '60px', height: '60px', objectFit: 'cover' }} /></td>
-                        <td>{post.title}</td>
-                        <td>{new Date(post.created_at).toLocaleDateString()}</td>
-                        <td className="actions-cell">
-                          <Link href={`/dashboard/editPost?id=${post.id}`} passHref>
-                            <Button size="sm" variant="outline-primary" className="me-2"><FaEdit /></Button>
-                          </Link>
-                          <Link href={`/artworks/${post.id}`} passHref>
-                            <Button size="sm" variant="outline-secondary" className="me-2"><FaEye /></Button>
-                          </Link>
-                          <Button size="sm" variant="outline-danger" onClick={() => handleDelete(post.id)}><FaTrash /></Button>
-                        </td>
+                <>
+                  <table className={styles.dashboardTable}>
+                    <thead>
+                      <tr>
+                        <th><FaImage className="me-1" />Thumbnail</th>
+                        <th><FaEdit className="me-1" />Title</th>
+                        <th><FaCalendarAlt className="me-1" />Date</th>
+                        <th><FaTasks className="me-1" />Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {paginatedPosts.map(post => (
+                        <tr key={post.id}>
+                          <td><img src={post.media_url} alt={post.title} style={{ width: '60px', height: '60px', objectFit: 'cover' }} /></td>
+                          <td>{post.title}</td>
+                          <td>{new Date(post.created_at).toLocaleDateString()}</td>
+                          <td className="actions-cell">
+                            <Link href={`/dashboard/editPost?id=${post.id}`} passHref>
+                              <Button size="sm" variant="outline-primary" className="me-2"><FaEdit /></Button>
+                            </Link>
+                            <Link href={`/artworks/${post.id}`} passHref>
+                              <Button size="sm" variant="outline-secondary" className="me-2"><FaEye /></Button>
+                            </Link>
+                            <Button size="sm" variant="outline-danger" onClick={() => handleDelete(post.id)}><FaTrash /></Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {/* pagination controls */}
+                  {totalPages > 1 && (
+                    <Pagination className="justify-content-center mt-3">
+                      <Pagination.Prev onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} />
+                      {[...Array(totalPages)].map((_, idx) => (
+                        <Pagination.Item key={idx + 1} active={currentPage === idx + 1} onClick={() => setCurrentPage(idx + 1)}>
+                          {idx + 1}
+                        </Pagination.Item>
+                      ))}
+                      <Pagination.Next onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} />
+                    </Pagination>
+                  )}
+                 </>
                )}
              </Card.Body>
            </Card>
