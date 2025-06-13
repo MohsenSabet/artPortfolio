@@ -5,11 +5,19 @@ import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabaseClient';
 import dynamic from 'next/dynamic';
 
-/* widgets that need the browser */
-const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
+/* ── Browser-only widgets ────────────────────────────────── */
+const ReactQuill = dynamic(async () => {
+  const { default: Quill } = await import('react-quill-new');
+  if (typeof window !== 'undefined') {
+    // theme JS touches document.*, so load it only in the browser
+    await import('react-quill-new/dist/quill.snow.css');
+  }
+  return Quill;
+}, { ssr: false });
+
 const ReactDatePicker = dynamic(() => import('react-datepicker'), { ssr: false });
-import 'react-quill-new/dist/quill.snow.css';
 import 'react-datepicker/dist/react-datepicker.css';
+/* ─────────────────────────────────────────────────────────── */
 
 function EditPost() {
   const router = useRouter();
@@ -29,7 +37,7 @@ function EditPost() {
   const [mediaFile, setMediaFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
 
-  /* quill config */
+  /* ── Quill config ── */
   const quillModules = {
     toolbar: [
       [{ font: [] }],
@@ -48,29 +56,23 @@ function EditPost() {
     'color', 'background', 'script', 'header', 'align',
   ];
 
-  /* fetch data */
+  /* ── fetch post once we have an id ── */
   useEffect(() => {
     if (!id) return;
-
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return router.push('/login');
 
-      const { data, error } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('id', id)
-        .single();
-
+      const { data, error } = await supabase.from('posts').select('*').eq('id', id).single();
       if (error) setStatus({ loading: false, error: error.message });
       else {
         setFormData(data);
         setPreviewUrl(data.media_url);
       }
     })();
-  }, [id]);
+  }, [id, router]);
 
-  /* handlers */
+  /* ── handlers ── */
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((p) => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
@@ -94,7 +96,7 @@ function EditPost() {
       return;
     }
 
-    /* upload new media if selected */
+    /* upload new file if chosen */
     let mediaUrl = formData.media_url;
     if (mediaFile) {
       if (mediaUrl?.includes('/posts/')) {
@@ -103,11 +105,7 @@ function EditPost() {
       }
       const ext = mediaFile.name.split('.').pop();
       const fileName = `${session.user.id}/${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase
-        .storage
-        .from('posts')
-        .upload(fileName, mediaFile);
-
+      const { error: uploadError } = await supabase.storage.from('posts').upload(fileName, mediaFile);
       if (uploadError) {
         setStatus({ loading: false, error: uploadError.message });
         return;
@@ -125,7 +123,7 @@ function EditPost() {
     else router.push('/dashboard/managePost');
   };
 
-  /* render */
+  /* ── render ── */
   return (
     <Container className="mt-5">
       <h2>Edit Post</h2>
@@ -133,11 +131,13 @@ function EditPost() {
       {status.error && <Alert variant="danger">{status.error}</Alert>}
 
       <Form onSubmit={handleSubmit}>
+        {/* title */}
         <Form.Group controlId="title" className="mb-3">
           <Form.Label>Title</Form.Label>
           <Form.Control name="title" value={formData.title} onChange={handleChange} />
         </Form.Group>
 
+        {/* media */}
         <Form.Group controlId="media" className="mb-3">
           <Form.Label>Media File</Form.Label>
           <Form.Control type="file" accept="image/*,video/*" onChange={handleFileChange} />
@@ -161,12 +161,13 @@ function EditPost() {
           )
         )}
 
+        {/* category & privacy */}
         <Row className="mb-3">
           <Col md={6}>
             <Form.Group controlId="category">
               <Form.Label>Category</Form.Label>
               <Form.Select name="category" value={formData.category} onChange={handleChange}>
-                {/* …options list unchanged… */}
+                {/* (same category list) */}
                 <option>Painting</option>
                 <option>Illustration</option>
                 <option>Photography</option>
@@ -199,6 +200,7 @@ function EditPost() {
           </Col>
         </Row>
 
+        {/* include date + date picker */}
         <Form.Check
           type="checkbox"
           label="Include Date"
@@ -215,6 +217,7 @@ function EditPost() {
           />
         )}
 
+        {/* featured */}
         <Form.Check
           type="checkbox"
           label="Featured"
@@ -224,6 +227,7 @@ function EditPost() {
           className="mb-3"
         />
 
+        {/* description */}
         <Form.Group controlId="description" className="mb-3">
           <Form.Label>Description</Form.Label>
           <ReactQuill
@@ -243,7 +247,5 @@ function EditPost() {
   );
 }
 
-/* ──────────────────────────────────────────────
-   ❱❱  KEY LINE: opt-out of SSR for this page  ❰❰
-────────────────────────────────────────────── */
-export default dynamic(() => Promise.resolve(EditPost), { ssr: false });
+/* ── export ──────────────────────────────────────────────── */
+export default EditPost;
