@@ -1,11 +1,13 @@
 /* pages/portfolio.js */
 /* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-html-link-for-pages */
 "use client";
 import React, { useEffect, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
 import dynamic from "next/dynamic";
 import Head from "next/head";
+import Link from "next/link";
 import { supabase } from "@/lib/supabaseClient";
 import portfolioStyles from "@/styles/portfolioStyles";
 
@@ -224,7 +226,8 @@ export default function Portfolio({ posts, profile }) {
             {profile.pronouns && ` (${profile.pronouns})`}
           </h3>
           {profile.portfolio_intro && <p>{profile.portfolio_intro}</p>}
-          <a href="/about" className="about-link">Learn more about the artist &rarr;</a>
+          {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+          <Link href="/about" className="about-link">Learn more about the artist &rarr;</Link>
         </div>
       )}
 

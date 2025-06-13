@@ -3,6 +3,7 @@ import { Card, Badge } from 'react-bootstrap';
 import Link from 'next/link';
 import styles from './ArtworkCard.module.css';
 
+/* eslint-disable @next/next/no-img-element */
 // Utility to format date consistently across server and client
 function formatDate(dateStr) {
   const d = new Date(dateStr);
