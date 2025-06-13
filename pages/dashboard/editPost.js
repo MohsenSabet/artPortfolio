@@ -14,17 +14,18 @@ import dynamic from 'next/dynamic';
 const ReactQuill = dynamic(async () => {
   const { default: Quill } = await import('react-quill-new');
   if (typeof window !== 'undefined') {
-    /* theme CSS touches document styles, so load only on client */
     await import('react-quill-new/dist/quill.snow.css');
   }
   return Quill;
 }, { ssr: false });
 
-const ReactDatePicker = dynamic(
-  () => import('react-datepicker'),
-  { ssr: false }
-);
-import 'react-datepicker/dist/react-datepicker.css';
+const ReactDatePicker = dynamic(async () => {
+  const mod = await import('react-datepicker');
+  if (typeof window !== 'undefined') {
+    await import('react-datepicker/dist/react-datepicker.css');
+  }
+  return mod.default;
+}, { ssr: false });
 /* ───────────────────────────────────────────────────────────── */
 
 export default function EditPost() {
@@ -85,7 +86,7 @@ export default function EditPost() {
     })();
   }, [id, router]);
 
-  /* ── handlers ─ */
+  /* ── handlers ── */
   const handleChange = (e) => {
     const { name, value, type, checked, files } = e.target;
     if (type === 'file' && files?.[0]) {
@@ -135,7 +136,7 @@ export default function EditPost() {
     else router.push('/dashboard/managePost');
   };
 
-  /* ── render ─ */
+  /* ── render ── */
   return (
     <Container className="mt-5">
       <h2>Edit Post</h2>
