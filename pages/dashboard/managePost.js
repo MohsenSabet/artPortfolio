@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Container, Alert, ButtonGroup } from 'react-bootstrap';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/router';
+import styles from '@/styles/Dashboard.module.css';
 
 export default function ManagePost() {
   const router = useRouter();
@@ -77,52 +78,54 @@ export default function ManagePost() {
     <Container className="mt-5">
       {error && <Alert variant="danger">{error}</Alert>}
       <div className="mb-3">
-        <ButtonGroup>
+        <ButtonGroup className="d-flex flex-column flex-md-row">
           <Button variant={filter === 'all' ? 'primary' : 'outline-primary'} onClick={() => setFilter('all')}>Total ({posts.length})</Button>
           <Button variant={filter === 'public' ? 'success' : 'outline-success'} onClick={() => setFilter('public')}>Public ({posts.filter(p => p.privacy === 'Public').length})</Button>
           <Button variant={filter === 'private' ? 'warning' : 'outline-warning'} onClick={() => setFilter('private')}>Private ({posts.filter(p => p.privacy === 'Private').length})</Button>
           <Button variant={filter === 'featured' ? 'info' : 'outline-info'} onClick={() => setFilter('featured')}>Featured ({posts.filter(p => p.featured).length})</Button>
         </ButtonGroup>
       </div>
-      <Table striped hover>
-        <thead>
-          <tr>
-            <th>Thumbnail</th>
-            <th>Title</th>
-            <th>Category</th>
-            <th>Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {displayedPosts.map((p) => (
-            <tr key={p.id}>
-              <td>
-                <img
-                  src={p.media_url}
-                  alt={p.title}
-                  style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }}
-                />
-              </td>
-              <td>{p.title}</td>
-              <td>{p.category}</td>
-              <td>{new Date(p.created_at).toLocaleDateString()}</td>
-              <td>
-                {/* quick action buttons */}
-                <Button size="sm" variant={p.featured ? 'outline-info' : 'info'} onClick={() => handleToggleFeatured(p.id, p.featured)}>
-                  {p.featured ? 'Unfeature' : 'Feature'}
-                </Button>{' '}
-                <Button size="sm" variant={p.privacy === 'Public' ? 'outline-warning' : 'outline-success'} onClick={() => handleTogglePrivacy(p.id, p.privacy)}>
-                  {p.privacy === 'Public' ? 'Make Private' : 'Make Public'}
-                </Button>{' '}
-                {/* existing Edit/Delete buttons */}
-                <Button size="sm" variant="outline-primary" onClick={() => router.push(`/dashboard/editPost?id=${p.id}`)}>Edit</Button>{' '}
-                <Button size="sm" variant="outline-danger" onClick={() => handleDelete(p.id)}>Delete</Button>
-              </td>
+      <div className={styles.dashboardTableContainer}>
+        <Table responsive striped hover className={styles.dashboardTable}>
+          <thead>
+            <tr>
+              <th>Thumbnail</th>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Date</th>
+              <th>Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {displayedPosts.map((p) => (
+              <tr key={p.id}>
+                <td>
+                  <img
+                    src={p.media_url}
+                    alt={p.title}
+                    style={{ width: '60px', height: '60px', objectFit: 'cover', borderRadius: '4px' }}
+                  />
+                </td>
+                <td>{p.title}</td>
+                <td>{p.category}</td>
+                <td>{new Date(p.created_at).toLocaleDateString()}</td>
+                <td className={styles.actionsCell}>
+                  {/* quick action buttons */}
+                  <Button size="sm" variant={p.featured ? 'outline-info' : 'info'} onClick={() => handleToggleFeatured(p.id, p.featured)}>
+                    {p.featured ? 'Unfeature' : 'Feature'}
+                  </Button>{' '}
+                  <Button size="sm" variant={p.privacy === 'Public' ? 'outline-warning' : 'outline-success'} onClick={() => handleTogglePrivacy(p.id, p.privacy)}>
+                    {p.privacy === 'Public' ? 'Make Private' : 'Make Public'}
+                  </Button>{' '}
+                  {/* existing Edit/Delete buttons */}
+                  <Button size="sm" variant="outline-primary" onClick={() => router.push(`/dashboard/editPost?id=${p.id}`)}>Edit</Button>{' '}
+                  <Button size="sm" variant="outline-danger" onClick={() => handleDelete(p.id)}>Delete</Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
     </Container>
   );
 }

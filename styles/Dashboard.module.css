@@ -103,6 +103,20 @@
   border-color: rgba(255,255,255,0.5);
 }
 
+/* ensure action buttons visible on mobile by stacking and wrapping */
+.actions-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 576px) {
+  .actions-cell button {
+    flex: 1 1 100%;
+    margin-bottom: 0.5rem;
+  }
+}
+
 /* Scrollbar styling */
 .dashboardTableContainer::-webkit-scrollbar {
   height: 6px;
