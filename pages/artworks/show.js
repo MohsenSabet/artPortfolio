@@ -13,13 +13,18 @@ const SunsetBackground = dynamic(
 );
 
 export async function getServerSideProps({ query }) {
-  const medium = query.medium;
-  const { data: posts, error } = await supabase
+  const medium = query.medium || 'All';
+  // Build base query for public posts
+  let postsQuery = supabase
     .from('posts')
     .select('*, profiles(first_name,last_name,avatar_url,username,pronouns)')
-    .eq('category', medium)
     .eq('privacy', 'Public')
     .order('created_at', { ascending: false });
+  // Apply category filter only if a specific medium is selected
+  if (medium !== 'All') {
+    postsQuery = postsQuery.eq('category', medium);
+  }
+  const { data: posts, error } = await postsQuery;
   if (error) console.error('Error fetching posts for medium', medium, error.message);
   return { props: { posts: posts || [], medium } };
 }

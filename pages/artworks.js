@@ -19,7 +19,8 @@ export async function getServerSideProps() {
     .eq('privacy', 'Public')
     .order('category', { ascending: true });
   if (error) console.error('Error fetching categories:', error.message);
-  const categories = Array.from(new Set((data || []).map((p) => p.category)));
+  const uniqueCategories = Array.from(new Set((data || []).map((p) => p.category)));
+  const categories = ['All', ...uniqueCategories];
   return { props: { categories } };
 }
 
@@ -32,7 +33,15 @@ export default function Artworks({ categories }) {
       <Container fluid>
         <div className={styles.categoryGrid}>
           {categories.map((category) => (
-            <Link key={category} href={`/artworks/show?medium=${encodeURIComponent(category)}`} passHref>
+            <Link
+              key={category}
+              href={
+                category === 'All'
+                  ? '/artworks/show'
+                  : `/artworks/show?medium=${encodeURIComponent(category)}`
+              }
+              passHref
+            >
               <div className={styles.cardCategory}>
                 <h3 className={styles.cardCategoryTitle}>{category}</h3>
               </div>
