@@ -35,13 +35,10 @@ export default function MainNav() {
             <Nav.Link as={Link} href="/">Home</Nav.Link>
             <Nav.Link as={Link} href="/about">About</Nav.Link>
             <Nav.Link as={Link} href="/artworks">Artworks</Nav.Link>
-            {/* Show portfolio and dashboard only to authenticated users */}
-            {session && (
-              <>
-                <Nav.Link as={Link} href="/portfolio">Portfolio</Nav.Link>
-                <Nav.Link as={Link} href="/dashboard">Dashboard</Nav.Link>
-              </>
-            )}
+            {/* Portfolio visible to all users */}
+            <Nav.Link as={Link} href="/portfolio">Portfolio</Nav.Link>
+            {/* Dashboard only for authenticated users */}
+            {session && <Nav.Link as={Link} href="/dashboard">Dashboard</Nav.Link>}
           </Nav>
           <Nav className="ms-auto">
             {session ? (
