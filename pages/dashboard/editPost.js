@@ -1,32 +1,27 @@
-/* ──────────────────────────────────────────────────────────────
-   File: pages/dashboard/editPost.js
-   Uses Client-only CSS injection for react-datepicker
-────────────────────────────────────────────────────────────── */
-
+import dynamic from 'next/dynamic';
 import { useState, useEffect } from 'react';
 import { Form, Button, Row, Col, Alert, Container } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabaseClient';
-import dynamic from 'next/dynamic';
 
-/* ── browser-only widgets ───────────────────────────────────── */
-// ReactQuill stays the same
-const ReactQuill = dynamic(async () => {
-  const { default: Quill } = await import('react-quill-new');
-  if (typeof window !== 'undefined') {
-    await import('react-quill-new/dist/quill.snow.css');
-  }
-  return Quill;
-}, { ssr: false });
+// Browser-only imports:
+const ReactQuill = dynamic(
+  async () => {
+    const { default: Quill } = await import('react-quill-new');
+    if (typeof window !== 'undefined') {
+      await import('react-quill-new/dist/quill.snow.css');
+    }
+    return Quill;
+  },
+  { ssr: false }
+);
 
-// Plain dynamic import of react-datepicker (no CSS here)
 const ReactDatePicker = dynamic(
   () => import('react-datepicker'),
   { ssr: false }
 );
-/* ───────────────────────────────────────────────────────────── */
 
-export default function EditPost() {
+function EditPost() {
   const router = useRouter();
   const { id } = router.query;
 
@@ -44,27 +39,24 @@ export default function EditPost() {
   const [mediaFile, setMediaFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
 
-  // Inject the DatePicker CSS only in the browser
+  // Inject datepicker CSS only in browser
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
     link.href = 'https://unpkg.com/react-datepicker/dist/react-datepicker.css';
     document.head.appendChild(link);
-    return () => {
-      document.head.removeChild(link);
-    };
+    return () => document.head.removeChild(link);
   }, []);
 
-  /* ── Quill config ── */
   const quillModules = {
     toolbar: [
       [{ font: [] }],
       [{ size: ['small', false, 'large', 'huge'] }],
-      ['bold', 'italic', 'underline', 'strike'],
-      [{ color: [] }, { background: [] }],
-      [{ script: 'sub' }, { script: 'super' }],
-      [{ header: [1, 2, 3, 4, false] }],
+      ['bold','italic','underline','strike'],
+      [{ color: [] },{ background: [] }],
+      [{ script: 'sub' },{ script: 'super' }],
+      [{ header: [1,2,3,4,false] }],
       [{ align: [] }],
       ['clean'],
     ],
@@ -72,10 +64,10 @@ export default function EditPost() {
   };
   const quillFormats = [
     'font','size','bold','italic','underline','strike',
-    'color','background','script','header','align',
+    'color','background','script','header','align'
   ];
 
-  /* ── fetch post once we have an id ── */
+  // Fetch existing post
   useEffect(() => {
     if (!id) return;
     (async () => {
@@ -96,19 +88,22 @@ export default function EditPost() {
     })();
   }, [id, router]);
 
-  /* ── handlers ── */
-  const handleChange = (e) => {
+  // Input/change handlers
+  const handleChange = e => {
     const { name, value, type, checked, files } = e.target;
     if (type === 'file' && files?.[0]) {
-      const file = files[0];
-      setMediaFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
+      setMediaFile(files[0]);
+      setPreviewUrl(URL.createObjectURL(files[0]));
     } else {
-      setFormData(p => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
+      setFormData(p => ({
+        ...p,
+        [name]: type === 'checkbox' ? checked : value
+      }));
     }
   };
 
-  const handleSubmit = async (e) => {
+  // Submit
+  const handleSubmit = async e => {
     e.preventDefault();
     setStatus({ loading: true, error: null });
 
@@ -118,14 +113,13 @@ export default function EditPost() {
       return;
     }
 
-    /* upload new file if chosen */
     let mediaUrl = formData.media_url;
     if (mediaFile) {
       if (mediaUrl?.includes('/posts/')) {
         const oldPath = mediaUrl.split('/posts/')[1];
         await supabase.storage.from('posts').remove([oldPath]).catch(() => {});
       }
-      const ext      = mediaFile.name.split('.').pop();
+      const ext = mediaFile.name.split('.').pop();
       const fileName = `${session.user.id}/${Date.now()}.${ext}`;
       const { error: uploadError } =
         await supabase.storage.from('posts').upload(fileName, mediaFile);
@@ -133,10 +127,11 @@ export default function EditPost() {
         setStatus({ loading: false, error: uploadError.message });
         return;
       }
-      mediaUrl = supabase.storage.from('posts').getPublicUrl(fileName).data.publicUrl;
+      mediaUrl = supabase.storage
+        .from('posts')
+        .getPublicUrl(fileName).data.publicUrl;
     }
 
-    /* update row */
     const { error } = await supabase
       .from('posts')
       .update({ ...formData, media_url: mediaUrl })
@@ -146,14 +141,13 @@ export default function EditPost() {
     else router.push('/dashboard/managePost');
   };
 
-  /* ── render ── */
   return (
     <Container className="mt-5">
       <h2>Edit Post</h2>
       {status.error && <Alert variant="danger">{status.error}</Alert>}
 
       <Form onSubmit={handleSubmit}>
-        {/* title */}
+        {/* Title */}
         <Form.Group controlId="title" className="mb-3">
           <Form.Label>Title</Form.Label>
           <Form.Control
@@ -163,7 +157,7 @@ export default function EditPost() {
           />
         </Form.Group>
 
-        {/* media */}
+        {/* Media File */}
         <Form.Group controlId="media" className="mb-3">
           <Form.Label>Media File</Form.Label>
           <Form.Control
@@ -173,25 +167,24 @@ export default function EditPost() {
           />
         </Form.Group>
 
+        {/* Preview */}
         {previewUrl && (
-          /\.(mp4|webm|ogg|mov)$/i.test(previewUrl) ? (
-            <video
-              controls
-              src={previewUrl}
-              className="img-fluid rounded mb-3"
-              style={{ objectFit: 'cover', width: '100%', maxHeight: '300px' }}
-            />
-          ) : (
-            <img
-              src={previewUrl}
-              alt="Preview"
-              className="img-fluid rounded mb-3"
-              style={{ objectFit: 'cover', width: '100%', maxHeight: '300px' }}
-            />
-          )
+          /\.(mp4|webm|ogg|mov)$/i.test(previewUrl)
+            ? <video
+                controls
+                src={previewUrl}
+                className="img-fluid rounded mb-3"
+                style={{ objectFit:'cover', width:'100%', maxHeight:300 }}
+              />
+            : <img
+                src={previewUrl}
+                alt="Preview"
+                className="img-fluid rounded mb-3"
+                style={{ objectFit:'cover', width:'100%', maxHeight:300 }}
+              />
         )}
 
-        {/* category & privacy */}
+        {/* Category & Privacy */}
         <Row className="mb-3">
           <Col md={6}>
             <Form.Group controlId="category">
@@ -201,6 +194,7 @@ export default function EditPost() {
                 value={formData.category}
                 onChange={handleChange}
               >
+                {/* your <option> list */}
                 <option>Painting</option>
                 <option>Illustration</option>
                 <option>Photography</option>
@@ -237,7 +231,7 @@ export default function EditPost() {
           </Col>
         </Row>
 
-        {/* include date + date picker */}
+        {/* Include Date */}
         <Form.Check
           type="checkbox"
           label="Include Date"
@@ -254,7 +248,7 @@ export default function EditPost() {
           />
         )}
 
-        {/* featured */}
+        {/* Featured */}
         <Form.Check
           type="checkbox"
           label="Featured"
@@ -264,7 +258,7 @@ export default function EditPost() {
           className="mb-3"
         />
 
-        {/* description */}
+        {/* Description */}
         <Form.Group controlId="description" className="mb-3">
           <Form.Label>Description</Form.Label>
           <ReactQuill
@@ -283,3 +277,9 @@ export default function EditPost() {
     </Container>
   );
 }
+
+// Wrap the page as client-only so Next.js never SSRs it
+export default dynamic(
+  () => Promise.resolve(EditPost),
+  { ssr: false }
+);
