@@ -1,44 +1,89 @@
-import React, { useState, useEffect } from 'react';
+// pages/dashboard/editPost.js
+import { useState, useEffect } from 'react';
 import { Form, Button, Row, Col, Alert, Container } from 'react-bootstrap';
 import { useRouter } from 'next/router';
 import { supabase } from '@/lib/supabaseClient';
-import ReactQuill from 'react-quill-new';
-import 'react-quill-new/dist/quill.snow.css';
-import ReactDatePicker from 'react-datepicker';
+import dynamic from 'next/dynamic';
+
+/* ──────────────────────────────────────────────
+   DOM-hungry widgets → load only in the browser
+─────────────────────────────────────────────── */
+const ReactQuill = dynamic(async () => {
+  const { default: Quill } = await import('react-quill-new');
+  if (typeof window !== 'undefined') {
+    await import('react-quill-new/dist/quill.snow.css'); // theme touches document.*
+  }
+  return Quill;
+}, { ssr: false });
+
+const ReactDatePicker = dynamic(() => import('react-datepicker'), { ssr: false });
 import 'react-datepicker/dist/react-datepicker.css';
+
+/* ────────────────────────────────────────────── */
 
 export default function EditPost() {
   const router = useRouter();
   const { id } = router.query;
-  const [formData, setFormData] = useState({ title: '', media_url: '', category: 'Painting', privacy: 'Public', include_date: false, date: '', featured: false, description: '' });
+
+  const [formData, setFormData] = useState({
+    title: '',
+    media_url: '',
+    category: 'Painting',
+    privacy: 'Public',
+    include_date: false,
+    date: '',
+    featured: false,
+    description: '',
+  });
   const [status, setStatus] = useState({ loading: false, error: null });
   const [mediaFile, setMediaFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
 
-  // Quill modules/formats
-  const quillModules = { /* same as AddPost toolbar config */
-    toolbar: [[{ 'font': [] }], [{ 'size': ['small', false, 'large', 'huge'] }], ['bold','italic','underline','strike'], [{ 'color': [] }, { 'background': [] }], [{ 'script': 'sub' },{ 'script': 'super' }], [{ 'header': [1,2,3,4,false] }], [{ 'align': [] }], ['clean']], keyboard: true };
-  const quillFormats = ['font','size','bold','italic','underline','strike','color','background','script','header','align'];
+  /* ── Quill config (same toolbar as AddPost) ── */
+  const quillModules = {
+    toolbar: [
+      [{ font: [] }],
+      [{ size: ['small', false, 'large', 'huge'] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ color: [] }, { background: [] }],
+      [{ script: 'sub' }, { script: 'super' }],
+      [{ header: [1, 2, 3, 4, false] }],
+      [{ align: [] }],
+      ['clean'],
+    ],
+    keyboard: true,
+  };
+  const quillFormats = [
+    'font', 'size', 'bold', 'italic', 'underline', 'strike',
+    'color', 'background', 'script', 'header', 'align',
+  ];
 
+  /* ── fetch post ── */
   useEffect(() => {
     if (!id) return;
+
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) return router.push('/login');
-      const { data, error } = await supabase.from('posts').select('*').eq('id', id).single();
-      if (error) {
-        setStatus({ loading: false, error: error.message });
-      } else {
+
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) setStatus({ loading: false, error: error.message });
+      else {
         setFormData(data);
         setPreviewUrl(data.media_url);
       }
     })();
   }, [id]);
 
+  /* ── handlers ── */
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    if (type === 'checkbox') setFormData(prev => ({ ...prev, [name]: checked }));
-    else setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((p) => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleFileChange = (e) => {
@@ -52,82 +97,105 @@ export default function EditPost() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus({ loading: true, error: null });
-    let updatedUrl = formData.media_url;
-    // get user session for storage path
+
     const { data: { session } } = await supabase.auth.getSession();
-    // if new file selected, upload to storage
-    if (mediaFile && session) {
-      // delete old file from storage
-      if (formData.media_url && formData.media_url.includes('/posts/')) {
+    if (!session) {
+      setStatus({ loading: false, error: 'Not authenticated' });
+      return;
+    }
+
+    /* upload new file if chosen */
+    let mediaUrl = formData.media_url;
+    if (mediaFile) {
+      if (formData.media_url?.includes('/posts/')) {
         const oldPath = formData.media_url.split('/posts/')[1];
-        const { error: deleteError } = await supabase.storage.from('posts').remove([oldPath]);
-        if (deleteError) {
-          setStatus({ loading: false, error: deleteError.message });
-          return;
-        }
+        await supabase.storage.from('posts').remove([oldPath]).catch(() => {/* ignore */});
       }
-      const fileExt = mediaFile.name.split('.').pop();
-      const fileName = `${session.user.id}/${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from('posts').upload(fileName, mediaFile);
+      const ext = mediaFile.name.split('.').pop();
+      const fileName = `${session.user.id}/${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase
+        .storage
+        .from('posts')
+        .upload(fileName, mediaFile);
+
       if (uploadError) {
         setStatus({ loading: false, error: uploadError.message });
         return;
       }
-      const { data: urlData } = supabase.storage.from('posts').getPublicUrl(fileName);
-      updatedUrl = urlData.publicUrl;
+      mediaUrl = supabase.storage.from('posts').getPublicUrl(fileName).data.publicUrl;
     }
-    const updateObj = { ...formData, media_url: updatedUrl };
-    const { error } = await supabase.from('posts').update(updateObj).eq('id', id);
+
+    /* update row */
+    const { error } = await supabase
+      .from('posts')
+      .update({ ...formData, media_url: mediaUrl })
+      .eq('id', id);
+
     if (error) setStatus({ loading: false, error: error.message });
     else router.push('/dashboard/managePost');
   };
 
+  /* ── render ── */
   return (
     <Container className="mt-5">
       <h2>Edit Post</h2>
+
       {status.error && <Alert variant="danger">{status.error}</Alert>}
+
       <Form onSubmit={handleSubmit}>
+        {/* title */}
         <Form.Group controlId="title" className="mb-3">
           <Form.Label>Title</Form.Label>
           <Form.Control name="title" value={formData.title} onChange={handleChange} />
         </Form.Group>
 
+        {/* media */}
         <Form.Group controlId="media" className="mb-3">
           <Form.Label>Media File</Form.Label>
           <Form.Control type="file" accept="image/*,video/*" onChange={handleFileChange} />
         </Form.Group>
+
         {previewUrl && (
           /\.(mp4|webm|ogg|mov)$/i.test(previewUrl) ? (
-            <video controls src={previewUrl} className="img-fluid rounded mb-3" style={{ objectFit: 'cover', width: '100%', maxHeight: '300px' }} />
+            <video
+              controls
+              src={previewUrl}
+              className="img-fluid rounded mb-3"
+              style={{ objectFit: 'cover', width: '100%', maxHeight: '300px' }}
+            />
           ) : (
-            <img src={previewUrl} alt="Preview" className="img-fluid rounded mb-3" style={{ objectFit: 'cover', width: '100%', maxHeight: '300px' }} />
+            <img
+              src={previewUrl}
+              alt="Preview"
+              className="img-fluid rounded mb-3"
+              style={{ objectFit: 'cover', width: '100%', maxHeight: '300px' }}
+            />
           )
         )}
 
+        {/* category & privacy */}
         <Row className="mb-3">
           <Col md={6}>
             <Form.Group controlId="category">
               <Form.Label>Category</Form.Label>
               <Form.Select name="category" value={formData.category} onChange={handleChange}>
-                 <option>Painting</option>
-                  <option>Illustration</option>
-                  <option>Photography</option>
-                  <option>Digital</option>
-                  <option>Life & Gesture Study</option>        {/* hands, poses, anatomy sketches */}
-                  <option>Character & Creature</option>        {/* stylized faces, animals, hybrids */}
-                  <option>Environment & Worldbuilding</option>  {/* castles, courtyards, landscapes */}
-                  <option>Concept & Experimental</option>      {/* “Process!”, abstract sketches */}
-                  <option>Watercolor Study</option>            {/* whales, gannets, landscapes */}
-                  <option>Ink & Linework</option>              {/* fineliner portraits, texture studies */}   <option>Marker Illustration</option>         {/* bold marker portraits series */}
-                  <option>Traditional Mixed Media</option>     {/* pencil + pen + color mixtures */}
-                  <option>Digital Illustration</option> 
-                  <option>Gesture & Life Study</option>
-                  <option>Character & Creature</option>
-                  <option>Environment & World-building</option>
-                  <option>Colour & Rendering</option>
-                  <option>Concept / Experimental</option>
-                           {/* any purely digital pieces */}
-                  <option>Other</option>
+                <option>Painting</option>
+                <option>Illustration</option>
+                <option>Photography</option>
+                <option>Digital</option>
+                <option>Life & Gesture Study</option>
+                <option>Character & Creature</option>
+                <option>Environment & Worldbuilding</option>
+                <option>Concept & Experimental</option>
+                <option>Watercolor Study</option>
+                <option>Ink & Linework</option>
+                <option>Marker Illustration</option>
+                <option>Traditional Mixed Media</option>
+                <option>Digital Illustration</option>
+                <option>Gesture & Life Study</option>
+                <option>Colour & Rendering</option>
+                <option>Concept / Experimental</option>
+                <option>Other</option>
               </Form.Select>
             </Form.Group>
           </Col>
@@ -135,30 +203,56 @@ export default function EditPost() {
             <Form.Group controlId="privacy">
               <Form.Label>Privacy</Form.Label>
               <Form.Select name="privacy" value={formData.privacy} onChange={handleChange}>
-                <option>Public</option><option>Private</option><option>Unlisted</option>
+                <option>Public</option>
+                <option>Private</option>
+                <option>Unlisted</option>
               </Form.Select>
             </Form.Group>
           </Col>
         </Row>
 
-        <Form.Check type="checkbox" label="Include Date" name="include_date" checked={formData.include_date} onChange={handleChange} />
+        {/* include date */}
+        <Form.Check
+          type="checkbox"
+          label="Include Date"
+          name="include_date"
+          checked={formData.include_date}
+          onChange={handleChange}
+        />
         {formData.include_date && (
           <ReactDatePicker
             selected={formData.date ? new Date(formData.date) : null}
-            onChange={(date) => setFormData(prev => ({ ...prev, date }))}
+            onChange={(date) => setFormData((p) => ({ ...p, date }))}
             dateFormat="yyyy-MM-dd"
             className="form-control mb-3"
           />
         )}
 
-        <Form.Check type="checkbox" label="Featured" name="featured" checked={formData.featured} onChange={handleChange} className="mb-3" />
+        {/* featured */}
+        <Form.Check
+          type="checkbox"
+          label="Featured"
+          name="featured"
+          checked={formData.featured}
+          onChange={handleChange}
+          className="mb-3"
+        />
 
+        {/* description */}
         <Form.Group controlId="description" className="mb-3">
           <Form.Label>Description</Form.Label>
-          <ReactQuill theme="snow" modules={quillModules} formats={quillFormats} value={formData.description} onChange={value => setFormData(prev => ({ ...prev, description: value }))} />
+          <ReactQuill
+            theme="snow"
+            modules={quillModules}
+            formats={quillFormats}
+            value={formData.description}
+            onChange={(v) => setFormData((p) => ({ ...p, description: v }))}
+          />
         </Form.Group>
 
-        <Button type="submit" disabled={status.loading}>{status.loading ? 'Saving...' : 'Save Changes'}</Button>
+        <Button type="submit" disabled={status.loading}>
+          {status.loading ? 'Saving…' : 'Save Changes'}
+        </Button>
       </Form>
     </Container>
   );
