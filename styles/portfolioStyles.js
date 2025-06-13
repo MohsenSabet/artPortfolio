@@ -244,6 +244,27 @@ const portfolioStyles = css.global`
       max-height: none;
     }
   }
+
+  /* end-of-portfolio indicator */
+  .end-indicator {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translate(-50%, 20px);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    padding: 0.75rem 1.5rem;
+    border-radius: 20px;
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    z-index: 6;
+  }
+  .end-indicator.visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 `;
 
 export default portfolioStyles;

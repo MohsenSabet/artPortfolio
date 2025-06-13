@@ -17,6 +17,7 @@ const TunnelBackground = dynamic(
 
 export default function Portfolio({ posts }) {
   const [showBackBtn, setShowBackBtn] = useState(false);
+  const [showEnd, setShowEnd] = useState(false);
   // helper to format custom post date consistently
   const formatDate = (dateStr) => {
     const d = new Date(dateStr);
@@ -139,6 +140,7 @@ export default function Portfolio({ posts }) {
     if (sentinel) {
       observer = new IntersectionObserver(([entry]) => {
         setShowBackBtn(entry.isIntersecting);
+        setShowEnd(entry.isIntersecting);
       }, { threshold: 1.0 });
       observer.observe(sentinel);
     }
@@ -229,6 +231,9 @@ export default function Portfolio({ posts }) {
       >
         <img src="/images/portfilio/arrow.gif" alt="Back to Top" width="32" height="32" />
       </button>
+      {/* end of portfolio indicator */}
+      <div className={`end-indicator ${showEnd ? 'visible' : ''}`}>End of Portfolio</div>
+
       {/* end of page content */}
     </>
   );
