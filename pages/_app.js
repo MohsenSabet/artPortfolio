@@ -15,10 +15,18 @@ export default function App({ Component, pageProps }) {
     router.events.on('routeChangeStart', handleStart);
     router.events.on('routeChangeComplete', handleStop);
     router.events.on('routeChangeError', handleStop);
+
+    // Prevent right-click on images
+    const handleContext = e => {
+      if (e.target.tagName === 'IMG') e.preventDefault();
+    };
+    document.addEventListener('contextmenu', handleContext);
+
     return () => {
       router.events.off('routeChangeStart', handleStart);
       router.events.off('routeChangeComplete', handleStop);
       router.events.off('routeChangeError', handleStop);
+      document.removeEventListener('contextmenu', handleContext);
     };
   }, [router]);
 
