@@ -329,3 +329,40 @@
   color: #fff;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7);
 }
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .profileInfo {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+
+  .profileImage {
+    width: 150px;
+    height: 150px;
+  }
+
+  .profileText {
+    text-align: center;
+  }
+
+  .profileBio,
+  .profileMediums {
+    max-width: 90%;
+    margin: 0 auto;
+  }
+
+  .aboutContent {
+    padding: 2rem 1rem;
+  }
+
+  .pageTitle {
+    font-size: 2.5rem;
+  }
+
+  .imageStackContainer {
+    display: none;
+  }
+}
