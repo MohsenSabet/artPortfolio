@@ -64,7 +64,8 @@ vec3 nrand3(vec2 co) {
 void main() {
     vec2 fragCoord = vUv * uResolution;
     // apply ultra-slow rotation to UV
-    float angle = uTime * 0.001;
+    // rotate background more perceptibly
+    float angle = uTime * 0.005;
     mat2 rot = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
     vec2 uv = rot * (2. * fragCoord / uResolution - 1.);
     vec2 uvs = uv * uResolution / max(uResolution.x, uResolution.y);
@@ -150,8 +151,14 @@ export default function TunnelBackground() {
   return (
     <Canvas
       frameloop="always"
-      style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: -1 }}
-      onCreated={({ gl }) => { gl.domElement.style.touchAction = 'none'; }}
+      style={{
+        position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+        pointerEvents: 'none', zIndex: -1,
+        // force GPU compositing layer to avoid browser scroll throttling
+        willChange: 'transform',
+        transform: 'translateZ(0)',
+        backfaceVisibility: 'hidden'
+      }}
       gl={{ antialias: true }}
       camera={{ position: [0, 0, 1], fov: 75 }}
     >
