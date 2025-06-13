@@ -77,35 +77,19 @@ const portfolioStyles = css.global`
     color: #eee;
   }
   .back-to-top {
-    position: fixed;
-    bottom: 40px;
-    left: 50%;
-    transform: translate(-50%, 20px);
-    opacity: 0;
-    pointer-events: none;
-    padding: 0.75rem 1.25rem;
-    font-size: 1rem;
-    background: transparent;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    z-index: 5;
-    transition: opacity 0.8s ease-out, transform 0.8s ease-out;
-  }
-  .back-to-top.visible {
-    opacity: 1;
-    transform: translate(-50%, 0);
+    position: static !important;
+    bottom: auto !important;
+    left: auto !important;
+    transform: none !important;
+    margin: 2rem auto 4rem;
+    display: block;
+    opacity: 1 !important;
     pointer-events: auto;
-  }
-  .back-to-top:hover {
-    transform: translate(-50%, 0) scale(1.4);
+    background: transparent !important;
+    border: none !important;
   }
   .back-to-top img {
-    width: 32px;
-    height: 32px;
-    transform: rotate(180deg);
-    display: block;
+    transform: rotate(180deg) !important;
   }
 
   /* vertical ribbon on right */
@@ -186,84 +170,60 @@ const portfolioStyles = css.global`
     flex-shrink: 0;
   }
 
-  /* Responsive adjustments */
-  @media (max-width: 1024px) {
-    .post-slide {
-      flex-direction: column;
-      padding: 1.5rem;
-    }
-    /* override any row-reverse on odd slides */
-    .post-slide:nth-child(odd) {
-      flex-direction: column;
-    }
-    .slide-text {
-      width: 100%;
-      margin-top: 1rem;
-    }
-    .slide-text h2 {
-      font-size: 2.5rem;
-    }
-    .slide-desc {
-      font-size: 1.1rem;
-    }
-    .vertical-ribbon-wrapper {
-      display: none;
-    }
-    .slide-image {
-      width: 100%;
-      max-height: none;
-    }
-  }
-  @media (max-width: 600px) {
-    .post-slide {
-      padding: 1rem;
-    }
-    /* ensure odd slides also column */
-    .post-slide:nth-child(odd) {
-      flex-direction: column;
-    }
-    .slide-text {
-      width: 100%;
-    }
-    .slide-text h2 {
-      font-size: 2rem;
-    }
-    .slide-desc {
-      font-size: 1rem;
-      line-height: 1.4;
-    }
-    .category-label-wrapper {
-      display: none;
-    }
-    .back-to-top {
-      bottom: 20px;
-      padding: 0.5rem 1rem;
-    }
-    .slide-image {
-      width: 100%;
-      max-height: none;
-    }
-  }
-
-  /* end-of-portfolio indicator */
-  .end-indicator {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translate(-50%, 20px);
-    background: rgba(255, 255, 255, 0.1);
+  /* artist info section styling */
+  .artist-info {
+    margin: 3rem auto;
+    padding: 2rem;
+    max-width: 600px;
+    text-align: center;
     color: #fff;
-    padding: 0.75rem 1.5rem;
-    border-radius: 20px;
-    font-size: 1rem;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-    z-index: 6;
   }
-  .end-indicator.visible {
-    opacity: 1;
-    transform: translate(-50%, 0);
+  .artist-info img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
+  .artist-info h2 {
+    font-family: "Playfair Display", serif;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .artist-info h3 {
+    font-family: "Playfair Display", serif;
+    font-size: 1.75rem;
+    margin: 0.25rem 0 1rem;
+  }
+  .artist-info p {
+    font-family: "Source Sans Pro", sans-serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  .artist-socials {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .artist-socials a {
+    color: #fff;
+    text-decoration: underline;
+    font-weight: 600;
+  }
+  .about-link {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.3s;
+  }
+  .about-link:hover {
+    border-color: #fff;
   }
 `;
 

@@ -15,9 +15,9 @@ const TunnelBackground = dynamic(
   { ssr: false }
 );
 
-export default function Portfolio({ posts }) {
-  const [showBackBtn, setShowBackBtn] = useState(false);
-  const [showEnd, setShowEnd] = useState(false);
+export default function Portfolio({ posts, profile }) {
+  // back-to-top always visible, no toggle state needed
+
   // helper to format custom post date consistently
   const formatDate = (dateStr) => {
     const d = new Date(dateStr);
@@ -134,20 +134,9 @@ export default function Portfolio({ posts }) {
       }
     });
 
-    // toggle back-to-top when sentinel at page end is in view
-    const sentinel = document.querySelector('.scroll-end-sentinel');
-    let observer;
-    if (sentinel) {
-      observer = new IntersectionObserver(([entry]) => {
-        setShowBackBtn(entry.isIntersecting);
-        setShowEnd(entry.isIntersecting);
-      }, { threshold: 1.0 });
-      observer.observe(sentinel);
-    }
-
+    // ...existing cleanup of ScrollTrigger...
     return () => {
       ScrollTrigger.getAll().forEach((st) => st.kill());
-      if (observer) observer.disconnect();
     };
   }, [posts]);
 
@@ -220,19 +209,49 @@ export default function Portfolio({ posts }) {
         ))}
       </div>
 
-      {/* sentinel at end to detect bottom */}
-      <div className="scroll-end-sentinel" style={{ height: '1px' }} />
+      {/* artist info section */}
+      {profile && (
+        <div className="artist-info">
+          <h2>Meet the Artist</h2>
+          {profile.avatar_url && (
+            <img
+              src={profile.avatar_url}
+              alt={`${profile.first_name} ${profile.last_name}`}
+            />
+          )}
+          <h3>
+            {profile.first_name} {profile.last_name}
+            {profile.pronouns && ` (${profile.pronouns})`}
+          </h3>
+          {profile.mediums && (
+            <p><strong>Mediums:</strong> {profile.mediums}</p>
+          )}
+          {profile.bio && <p>{profile.bio}</p>}
+          {(profile.twitter || profile.instagram || profile.linkedin) && (
+            <div className="artist-socials">
+              {profile.twitter && (
+                <a href={profile.twitter} target="_blank" rel="noopener noreferrer">Twitter</a>
+              )}
+              {profile.instagram && (
+                <a href={profile.instagram} target="_blank" rel="noopener noreferrer">Instagram</a>
+              )}
+              {profile.linkedin && (
+                <a href={profile.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+              )}
+            </div>
+          )}
+          <a href="/about" className="about-link">Learn more about the artist &rarr;</a>
+        </div>
+      )}
 
-      {/* back to top button */}
+      {/* back to top button relocated */}
       <button
-        className={`back-to-top ${showBackBtn ? 'visible' : ''}`}
+        className="back-to-top visible"
         onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         aria-label="Back to Top"
       >
         <img src="/images/portfilio/arrow.gif" alt="Back to Top" width="32" height="32" />
       </button>
-      {/* end of portfolio indicator */}
-      <div className={`end-indicator ${showEnd ? 'visible' : ''}`}>End of Portfolio</div>
 
       {/* end of page content */}
     </>
@@ -253,5 +272,12 @@ export async function getServerSideProps() {
 
   if (error) console.error("Error fetching featured posts:", error.message);
 
-  return { props: { posts: data || [] } };
+  // fetch artist profile info
+  const { data: profiles, error: profileError } = await supabase
+    .from("profiles")
+    .select("first_name,last_name,pronouns,avatar_url,mediums,bio,twitter,instagram,linkedin");
+  if (profileError) console.error("Error fetching profile:", profileError.message);
+  const profile = profiles?.[0] || null;
+
+  return { props: { posts: data || [], profile } };
 }

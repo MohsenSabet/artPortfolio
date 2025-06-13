@@ -8,7 +8,7 @@ export default function Layout({ children }) {
   return (
     <div className="d-flex flex-column min-vh-100">
       <MainNav />
-      <Container className="flex-grow-1 mt-4">
+      <Container className="flex-grow-1 mt-4 mb-5">
         {children}
       </Container>
       {router.pathname !== '/' && <Footer />}
