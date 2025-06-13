@@ -14,7 +14,8 @@ function ReflectiveGlobe() {
     const size = 128;
     const data = new Uint8Array(size * size);
     for (let i = 0; i < size * size; i++) data[i] = Math.random() * 255;
-    const tex = new THREE.DataTexture(data, size, size, THREE.LuminanceFormat);
+    // use RedFormat for single-channel data to match buffer length
+    const tex = new THREE.DataTexture(data, size, size, THREE.RedFormat, THREE.UnsignedByteType);
     tex.needsUpdate = true;
     return tex;
   }, []);
@@ -28,8 +29,11 @@ function ReflectiveGlobe() {
 
   useFrame(() => {
     if (cubeCamera.current) {
+      // hide mesh to prevent rendering feedback loop
+      meshRef.current.visible = false;
       cubeCamera.current.position.copy(meshRef.current.position);
       cubeCamera.current.update(gl, scene);
+      meshRef.current.visible = true;
     }
     meshRef.current.rotation.y += 0.004;
   });

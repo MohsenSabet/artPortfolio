@@ -43,6 +43,22 @@ export default function Portfolio({ posts }) {
     gsap.set('.category-label', { autoAlpha: 0, x: -30 });
     gsap.set('.vertical-ribbon-wrapper', { autoAlpha: 0, x: 30 });
 
+    // reveal label and ribbon immediately after a small scroll
+    ScrollTrigger.create({
+      trigger: 'body',
+      start: 'top -1', // when body has scrolled 1px
+      onEnter: () => {
+        const tlImmediate = gsap.timeline();
+        tlImmediate.to('.category-label', { autoAlpha: 1, x: 0, duration: 0.5, ease: 'power3.out' });
+        tlImmediate.to('.vertical-ribbon-wrapper', { autoAlpha: 1, x: 0, duration: 0.5, ease: 'power3.out' }, '-=0.4');
+      },
+      onLeaveBack: () => {
+        const tlHide = gsap.timeline();
+        tlHide.to('.category-label', { autoAlpha: 0, x: -30, duration: 0.5, ease: 'power3.in' });
+        tlHide.to('.vertical-ribbon-wrapper', { autoAlpha: 0, x: 30, duration: 0.5, ease: 'power3.in' }, '-=0.4');
+      },
+    });
+
     /* initial state for every slide */
     slides.forEach((slide) =>
       gsap.set(slide, { autoAlpha: 0, scale: 0.94, yPercent: 10 })
@@ -177,16 +193,12 @@ export default function Portfolio({ posts }) {
         {posts.map((post, idx) => (
           <section id={`slide-${idx}`} key={post.id} className="post-slide">
             {post.media_url && (
-               <img
-                 src={post.media_url}
-                 alt={post.title}
-                 style={{
-                   maxHeight: "80%",
-                   maxWidth: "45%",
-                   objectFit: "cover",
-                 }}
-               />
-             )}
+              <img
+                src={post.media_url}
+                alt={post.title}
+                className="slide-image"
+              />
+            )}
             <div className="slide-text">
               <h2>{post.title}</h2>
               <div

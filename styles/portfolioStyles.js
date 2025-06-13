@@ -172,9 +172,69 @@ const portfolioStyles = css.global`
     display: block;
     margin: 0.5rem auto 0;
   }
+
   @keyframes bounce {
     0%, 100% { transform: translate(-50%, -50%); opacity: 0.8; }
     50% { transform: translate(-50%, -60%); opacity: 1; }
+  }
+
+  /* artwork image styling */
+  .slide-image {
+    max-width: 60%;
+    max-height: 90%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 1024px) {
+    .post-slide {
+      flex-direction: column;
+      padding: 1.5rem;
+    }
+    .slide-text {
+      width: 80%;
+      margin-top: 1rem;
+    }
+    .slide-text h2 {
+      font-size: 2.5rem;
+    }
+    .slide-desc {
+      font-size: 1.1rem;
+    }
+    .vertical-ribbon-wrapper {
+      display: none;
+    }
+    .slide-image {
+      width: 70%;
+      max-height: none;
+    }
+  }
+  @media (max-width: 600px) {
+    .post-slide {
+      padding: 1rem;
+    }
+    .slide-text {
+      width: 100%;
+    }
+    .slide-text h2 {
+      font-size: 2rem;
+    }
+    .slide-desc {
+      font-size: 1rem;
+      line-height: 1.4;
+    }
+    .category-label-wrapper {
+      display: none;
+    }
+    .back-to-top {
+      bottom: 20px;
+      padding: 0.5rem 1rem;
+    }
+    .slide-image {
+      width: 100%;
+      max-height: none;
+    }
   }
 `;
 
