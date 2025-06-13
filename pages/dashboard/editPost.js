@@ -1,6 +1,7 @@
 /* ──────────────────────────────────────────────────────────────
    File: pages/dashboard/editPost.js
-   Updated: fixes “document is not defined” on Vercel build
+   Updated pattern matches your working addPost: DOM-only libs
+   are imported *exclusively* in the browser, so no build crash.
 ────────────────────────────────────────────────────────────── */
 
 import { useState, useEffect } from 'react';
@@ -10,14 +11,23 @@ import { supabase } from '@/lib/supabaseClient';
 import dynamic from 'next/dynamic';
 
 /* ── browser-only widgets ───────────────────────────────────── */
-const ReactQuill      = dynamic(() => import('react-quill-new'), { ssr: false });
-const ReactDatePicker = dynamic(() => import('react-datepicker'),  { ssr: false });
+const ReactQuill = dynamic(async () => {
+  const { default: Quill } = await import('react-quill-new');
+  if (typeof window !== 'undefined') {
+    /* theme CSS touches document styles, so load only on client */
+    await import('react-quill-new/dist/quill.snow.css');
+  }
+  return Quill;
+}, { ssr: false });
 
-import 'react-quill-new/dist/quill.snow.css';
+const ReactDatePicker = dynamic(
+  () => import('react-datepicker'),
+  { ssr: false }
+);
 import 'react-datepicker/dist/react-datepicker.css';
 /* ───────────────────────────────────────────────────────────── */
 
-function EditPost() {
+export default function EditPost() {
   const router = useRouter();
   const { id } = router.query;
 
@@ -77,15 +87,13 @@ function EditPost() {
 
   /* ── handlers ─ */
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((p) => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
+    const { name, value, type, checked, files } = e.target;
+    if (type === 'file' && files?.[0]) {
+      const file = files[0];
       setMediaFile(file);
       setPreviewUrl(URL.createObjectURL(file));
+    } else {
+      setFormData((p) => ({ ...p, [name]: type === 'checkbox' ? checked : value }));
     }
   };
 
@@ -114,12 +122,7 @@ function EditPost() {
         setStatus({ loading: false, error: uploadError.message });
         return;
       }
-      mediaUrl = supabase
-        .storage
-        .from('posts')
-        .getPublicUrl(fileName)
-        .data
-        .publicUrl;
+      mediaUrl = supabase.storage.from('posts').getPublicUrl(fileName).data.publicUrl;
     }
 
     /* update row */
@@ -156,7 +159,7 @@ function EditPost() {
           <Form.Control
             type="file"
             accept="image/*,video/*"
-            onChange={handleFileChange}
+            onChange={handleChange}
           />
         </Form.Group>
 
@@ -270,12 +273,3 @@ function EditPost() {
     </Container>
   );
 }
-
-/* ─────────────────────────────────────────────────────────────
-   Prevent static optimisation so build never runs the component
-────────────────────────────────────────────────────────────── */
-export async function getServerSideProps() {
-  return { props: {} };
-}
-
-export default EditPost;
