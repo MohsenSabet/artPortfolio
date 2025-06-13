@@ -68,3 +68,64 @@ a {
 .resizable-quill .ql-editor p {
   color: #212529 !important;
 }
+
+/* Full-page loading overlay */
+.page-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--background);
+  z-index: 9999;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.loader-ring {
+  position: relative;
+  border: 8px solid rgba(0, 0, 0, 0.1);
+  border-top-color: var(--foreground);
+  border-radius: 50%;
+  width: 80px;
+  height: 80px;
+  animation: spin 1s ease-in-out infinite;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.2);
+}
+.loader-ring::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  margin: -25px 0 0 -25px;
+  border: 5px solid transparent;
+  border-bottom-color: var(--foreground);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite reverse;
+}
+
+/* Bouncing dots loader */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-15px); }
+}
+.loader-dots {
+  display: flex;
+  gap: 12px;
+}
+.loader-dots span {
+  width: 12px;
+  height: 12px;
+  background: var(--foreground);
+  border-radius: 50%;
+  animation: bounce 0.6s infinite ease-in-out;
+}
+.loader-dots span:nth-child(1) { animation-delay: -0.24s; }
+.loader-dots span:nth-child(2) { animation-delay: -0.12s; }
+.loader-dots span:nth-child(3) { animation-delay: 0; }
