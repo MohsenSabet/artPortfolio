@@ -4,7 +4,7 @@ import styles from '../styles/About.module.css';
 import TunnelBackground from '../components/TunnelBackground';
 import StarField from '../components/StarField';
 import { supabase } from '../lib/supabaseClient';
-import { FaTwitter, FaLinkedin, FaInstagram } from 'react-icons/fa';
+import { FaTwitter, FaLinkedin, FaInstagram, FaEnvelope, FaPhone } from 'react-icons/fa';
 
 export default function About({ profile }) {
   // Guard: if no profile data, show fallback message
@@ -13,7 +13,7 @@ export default function About({ profile }) {
   }
 
   // Destructure profile data
-  const { first_name, last_name, avatar_url, bio, mediums, twitter, linkedin, instagram } = profile;
+  const { first_name, last_name, avatar_url, bio, mediums, twitter, linkedin, instagram, username, pronouns, email, phone } = profile;
 
   // These are the image filenames in your /public/images/about/ folder
   const numbers = [3, 4, 5, 6, 7, 8, 9, 10, 11];
@@ -27,36 +27,42 @@ export default function About({ profile }) {
           <h1 className={styles.pageTitle}>About</h1>
           <StarField />
           <div className={styles.profileInfo}>
-            <img
-              src={avatar_url}
-              alt={`${first_name} ${last_name}`}
-              className={styles.profileImage}
-            />
-            <div className={styles.profileText}>
-              <h2 className={styles.profileName}>{`${first_name} ${last_name}`}</h2>
-              <p className={styles.profileBio}>{bio}</p>
-              <p className={styles.profileMediums}><strong>Mediums:</strong> {mediums}</p>
-              <div className={styles.socials}>
+            <div className={styles.profileImageContainer}>
+              <img
+                src={avatar_url}
+                alt={`${first_name} ${last_name}`}
+                className={styles.profileImage}
+              />
+              <div className={styles.iconLine}>
+                {email && <a href={`mailto:${email}`}><FaEnvelope className={styles.icon} /></a>}
+                {phone && <a href={`tel:${phone}`}><FaPhone className={styles.icon} /></a>}
                 {twitter && (
                   <a href={twitter} target="_blank" rel="noopener noreferrer">
-                    <FaTwitter className={styles.socialIcon} />
+                    <FaTwitter className={styles.icon} />
                   </a>
                 )}
                 {linkedin && (
                   <a href={linkedin} target="_blank" rel="noopener noreferrer">
-                    <FaLinkedin className={styles.socialIcon} />
+                    <FaLinkedin className={styles.icon} />
                   </a>
                 )}
                 {instagram && (
                   <a href={instagram} target="_blank" rel="noopener noreferrer">
-                    <FaInstagram className={styles.socialIcon} />
+                    <FaInstagram className={styles.icon} />
                   </a>
                 )}
               </div>
             </div>
+            <div className={styles.profileText}>
+              {/* Name with pronouns */}
+              <h2 className={styles.profileName}>{`${first_name} ${last_name}${pronouns ? ` (${pronouns})` : ''}`}</h2>
+              {/* Bio */}
+              <p className={styles.profileBio}>{bio}</p>
+              {/* Mediums */}
+              <p className={styles.profileMediums}><strong>Mediums:</strong> {mediums.split(',').join(', ')}</p>
+            </div>
           </div>
           <div className={styles.imageStackContainer}>
-           
             {/* 4b) Stack every image at bottom‐right.
                   Layers 3, 5, 6, 9, and 11 get animation classes. */}
             {images.map((filename) => {
@@ -87,7 +93,7 @@ export default function About({ profile }) {
 export async function getStaticProps() {
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('first_name,last_name,bio,avatar_url,mediums,twitter,linkedin,instagram')
+    .select('first_name,last_name,username,pronouns,email,phone,avatar_url,bio,mediums,twitter,linkedin,instagram')
     .limit(1)
     .single();
 
