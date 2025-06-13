@@ -6,7 +6,8 @@ import { supabase } from '@/lib/supabaseClient';
 import 'react-quill-new/dist/quill.snow.css';
 import dynamic from 'next/dynamic';
 const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
-import ReactDatePicker from 'react-datepicker';
+// Dynamically load ReactDatePicker to prevent SSR errors
+const ReactDatePicker = dynamic(() => import('react-datepicker'), { ssr: false });
 import 'react-datepicker/dist/react-datepicker.css';
 
 export default function AddPost() {
