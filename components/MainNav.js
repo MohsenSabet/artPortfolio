@@ -28,7 +28,7 @@ export default function MainNav() {
       variant="dark"  
     >
       <Container>
-        <Navbar.Brand as={Link} href="/">Art Portfolio</Navbar.Brand>
+        <Navbar.Brand as={Link} href="/">Mohsen Sabet</Navbar.Brand>
         <Navbar.Toggle aria-controls="main-navbar-nav" />
         <Navbar.Collapse id="main-navbar-nav">
           <Nav className="me-auto">
@@ -44,7 +44,10 @@ export default function MainNav() {
             {session ? (
               <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
             ) : (
-              <Nav.Link as={Link} href="/login">Login</Nav.Link>
+              // only show login link on dashboard routes for public pages hide it
+              router.pathname.startsWith('/dashboard') && (
+                <Nav.Link as={Link} href="/login">Login</Nav.Link>
+              )
             )}
           </Nav>
         </Navbar.Collapse>
