@@ -79,7 +79,13 @@ export default function Home() {
            onHoverEnd={() => animate(bgSpeed, 0.2, { duration: 0.5 })}
          >
           {/* Clickable menu trigger (transparent circle) */}
-          <motion.div variants={{ open: {}, closed: {} }} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1 }}>
+          <motion.div
+            variants={{ open: {}, closed: {} }}
+            transformTemplate={(transformProps, transform) => `translate(-50%, -50%) ${transform}`}
+            style={{ position: 'absolute', top: '50%', left: '50%', zIndex: 1 }}
+            animate={{ y: [0, -10, 0] }}
+            transition={{ duration: 4, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }}
+          >
             <motion.div variants={{ open: { opacity: 0 }, closed: { opacity: 1 } }} transition={{ duration: 0.3 }} style={{ pointerEvents: 'none' }}>
               <Image priority src="/images/home/UFo1.png" alt="UFO1" width={260} height={260} />
             </motion.div>
