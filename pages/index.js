@@ -39,8 +39,20 @@ export default function Home() {
      }
    };
    const itemVariants = {
-     open: { opacity: 1 },
-     closed: { opacity: 0 }
+     closed: { opacity: 0, x: 0, y: 0 },
+     open: custom => {
+       // dynamic position based on index
+       const angles = [-90, 30, 150];
+       const angle = angles[custom % angles.length];
+       const rad = angle * (Math.PI / 180);
+       const radius = isMobile ? 120 : 180;
+       return {
+         opacity: 1,
+         x: Math.cos(rad) * radius,
+         y: Math.sin(rad) * radius,
+         transition: { type: 'spring', stiffness: 300 }
+       };
+     }
    };
    const options = [
      { label: 'Artworks', href: '/artworks' },
@@ -70,13 +82,12 @@ export default function Home() {
              display: 'flex', justifyContent: 'center', alignItems: 'center', cursor: 'pointer',
              border: '2px solid rgba(255, 255, 255, 0)'
            }}
-           variants={menuVariants} initial="closed"
-           {...(isMobile
-             ? { animate: menuOpen ? 'open' : 'closed', onClick: () => setMenuOpen(prev => !prev) }
-             : { whileHover: 'open' }
-           )}
-           onHoverStart={() => animate(bgSpeed, 10, { duration: 0.6 })}
-           onHoverEnd={() => animate(bgSpeed, 0.2, { duration: 0.5 })}
+           variants={menuVariants}
+           initial="closed"
+           animate={menuOpen ? 'open' : 'closed'}
+           onClick={isMobile ? () => setMenuOpen(prev => !prev) : undefined}
+           onHoverStart={e => { animate(bgSpeed, 10, { duration: 0.6 }); if (!isMobile) setMenuOpen(true); }}
+           onHoverEnd={e => { animate(bgSpeed, 0.2, { duration: 0.5 }); if (!isMobile) setMenuOpen(false); }}
          >
           {/* Clickable menu trigger (transparent circle) */}
           <motion.div
@@ -110,37 +121,29 @@ export default function Home() {
             </motion.div>
           </motion.div>
            {/* Three buttons around the globe on hover */}
-           {options.map((option, idx) => {
-             const angles = [-90, 30, 150];
-             const angle = angles[idx % angles.length];
-             const rad = angle * (Math.PI / 180);
-             const radius = isMobile ? 120 : 180;
-             const x = Math.cos(rad) * radius;
-             const y = Math.sin(rad) * radius;
-             return (
-               <motion.div
-                 key={option.label}
-                 style={{
-                   position: 'absolute', top: '50%', left: '50%',
-                   transform: `translate(-50%, -50%) translate(${x}px, ${y}px)`,
-                   background: 'rgba(255, 255, 255, 0.22)',
-                   backdropFilter: 'blur(10px)',
-                   WebkitBackdropFilter: 'blur(10px)',
-                   border: '1px solid rgba(255, 255, 255, 0.12)',
-                   borderRadius: '50%',
-                   width: 80, height: 80,
-                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                   boxShadow: '0 8px 16px rgba(0, 0, 0, 0)',
-                   cursor: 'pointer'
-                 }}
-                 variants={itemVariants}
-               >
-                 <Link href={option.href} style={{ color: '#000', textDecoration: 'none', fontSize: isMobile? '0.8rem':'1rem' }}>
-                   {option.label}
-                 </Link>
-               </motion.div>
-             );
-           })}
+           {options.map((option, idx) => (
+             <motion.div
+               key={option.label}
+               custom={idx}
+               variants={itemVariants}
+               transformTemplate={(transformProps, transform) => `translate(-50%, -50%) ${transform}`}
+               style={{
+                 position: 'absolute', top: '50%', left: '50%',
+                 background: 'rgba(255, 255, 255, 0.22)',
+                 backdropFilter: 'blur(10px)',
+                 WebkitBackdropFilter: 'blur(10px)',
+                 border: '1px solid rgba(255, 255, 255, 0.12)',
+                 borderRadius: '50%', width: 80, height: 80,
+                 display: 'flex', alignItems: 'center', justifyContent: 'center',
+                 boxShadow: '0 8px 16px rgba(0, 0, 0, 0)', cursor: 'pointer'
+               }}
+               whileHover={{ scale: 1.2, background: 'rgba(255, 255, 255, 0.35)', boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)' }}
+             >
+               <Link href={option.href} style={{ color: '#000', textDecoration: 'none', fontSize: isMobile? '0.8rem':'1rem' }}>
+                 {option.label}
+               </Link>
+             </motion.div>
+           ))}
          </motion.div>
        </div>
      </div>
