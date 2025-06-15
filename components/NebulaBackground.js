@@ -1,7 +1,7 @@
 // File: components/NebulaBackground.js
 "use client";
 
-import React, { useRef, useLayoutEffect } from 'react';
+import React, { useRef, useLayoutEffect, memo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { bgSpeed } from '@/lib/bgSpeed';
@@ -147,7 +147,7 @@ function NebulaMesh() {
       material.current.uniforms.uTime.value += delta * bgSpeed.get();
     }
   });
-
+   
   return (
     <mesh>
       <planeGeometry args={[2,2]} />
@@ -166,7 +166,7 @@ function NebulaMesh() {
 
 export { NebulaMesh };
 
-export default function NebulaBackground() {
+function NebulaBackground() {
   return (
     <Canvas
       frameloop="always"
@@ -186,3 +186,6 @@ export default function NebulaBackground() {
     </Canvas>
   );
 }
+
+// memoize to avoid re-render on parent updates
+export default memo(NebulaBackground);

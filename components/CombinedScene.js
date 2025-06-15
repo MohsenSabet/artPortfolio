@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect, useMemo } from 'react';
+import React, { useRef, useLayoutEffect, useMemo, memo } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { NebulaMesh } from './NebulaBackground';
@@ -53,7 +53,7 @@ function ReflectiveGlobe() {
   );
 }
 
-export default function CombinedScene() {
+function CombinedScene() {
   return (
     <Canvas
       style={{
@@ -75,3 +75,6 @@ export default function CombinedScene() {
     </Canvas>
   );
 }
+
+// Memoize to avoid re-rendering on parent state changes (hover)
+export default memo(CombinedScene);

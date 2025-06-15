@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo, } from 'react';
-import { motion, animate, AnimatePresence } from 'framer-motion';
-import { bgSpeed } from '@/lib/bgSpeed';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import CombinedScene from '@/components/CombinedScene';
 import Image from 'next/image';
+import NebulaBackground from '@/components/NebulaBackground';
+import { bgSpeed } from '@/lib/bgSpeed';
 
 export default function Home() {
     const [profile, setProfile] = useState(null);
@@ -66,6 +67,8 @@ export default function Home() {
      >
        {/* Combined nebula + reflective globe rendered via Three Fiber */}
        <CombinedScene />
+       {/* Single NebulaBackground; speed controlled via motionValue */}
+       <NebulaBackground />
 
       {/* Centered Menu Button */}
       <div style={{
@@ -86,8 +89,8 @@ export default function Home() {
            initial="closed"
            animate={menuOpen ? 'open' : 'closed'}
            onClick={isMobile ? () => setMenuOpen(prev => !prev) : undefined}
-           onHoverStart={e => { animate(bgSpeed, 10, { duration: 0.6 }); if (!isMobile) setMenuOpen(true); }}
-           onHoverEnd={e => { animate(bgSpeed, 0.2, { duration: 0.5 }); if (!isMobile) setMenuOpen(false); }}
+           onHoverStart={() => { bgSpeed.set(10); if (!isMobile) setMenuOpen(true); }}
+           onHoverEnd={() => { bgSpeed.set(0.2); if (!isMobile) setMenuOpen(false); }}
          >
           {/* Clickable menu trigger (transparent circle) */}
           <motion.div
