@@ -56,9 +56,9 @@ export default function Home() {
      }
    };
    const options = [
-     { label: 'Artworks', href: '/artworks' },
-     { label: 'About', href: '/about' },
-     { label: 'Portfolio', href: '/portfolio' }
+     { label: 'Portfolio', href: '/portfolio' },
+      { label: 'Artworks', href: '/artworks' },
+     { label: 'About', href: '/about' }
    ];
 
     return (
