@@ -136,6 +136,35 @@ const portfolioStyles = css.global`
   .intro-slide {
     background: transparent;
   }
+  /* intro content typography */
+  .intro-content {
+    position: relative;
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    color: #fff;
+    padding: 1rem;
+    opacity: 0;
+    animation: fadeInUp 1s ease-out 0.5s forwards;
+  }
+  .intro-content:hover h1 {
+    transform: scale(1.02);
+    transition: transform 0.3s ease;
+  }
+  .intro-content h1 {
+    font-family: "Playfair Display", serif;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .intro-content p {
+    font-family: "Source Sans Pro", sans-serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin: 0;
+  }
   .slide-indicator {
     position: absolute;
     top: 60%;
@@ -160,6 +189,10 @@ const portfolioStyles = css.global`
   @keyframes bounce {
     0%, 100% { transform: translate(-50%, -50%); opacity: 0.8; }
     50% { transform: translate(-50%, -60%); opacity: 1; }
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   /* artwork image styling */

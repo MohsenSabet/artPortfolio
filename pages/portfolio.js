@@ -183,6 +183,10 @@ export default function Portfolio({ posts, profile }) {
       <div className="slides-wrapper">
         {/* inline intro slide with call-to-action */}
         <section id="intro-slide" className="post-slide intro-slide">
+          <div className="intro-content">
+            <h1>Welcome to my Portfolio</h1>
+            <p>to see my artwork</p>
+          </div>
           <span className="slide-indicator">
             Scroll
             <img src="/images/portfilio/arrow.gif" alt="down arrow" />

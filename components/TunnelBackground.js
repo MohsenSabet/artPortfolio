@@ -133,7 +133,7 @@ function WarpMesh() {
 
   return (
     <mesh>
-      <planeGeometry args={[2, 2]} />
+      <planeGeometry args={[3, 3]} />
       <shaderMaterial
         ref={mat}
         vertexShader={vertSrc}
