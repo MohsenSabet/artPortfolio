@@ -140,7 +140,11 @@ export default function Home() {
                  display: 'flex', alignItems: 'center', justifyContent: 'center',
                  boxShadow: '0 8px 16px rgba(0, 0, 0, 0)', cursor: 'pointer'
                }}
-               whileHover={{ scale: 1.2, background: 'rgba(255, 255, 255, 0.35)', boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)' }}
+               whileHover={{
+                 scale: 1.2,
+                 background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(241, 236, 207, 0.87) 100%)',
+                 boxShadow: '0 0 26px rgba(255, 255, 255, 0.95), 0 0 32px rgba(255, 255, 255, 0.4)',
+               }}
              >
                <Link href={option.href} style={{ color: '#000', textDecoration: 'none', fontSize: isMobile? '0.8rem':'1rem' }}>
                  {option.label}
