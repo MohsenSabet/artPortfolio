@@ -259,10 +259,20 @@
   margin: 0;
 }
 
+.pronouns {
+  font-size: 0.75em;
+}
+
 .profileBio {
   font-size: 1rem;
   max-width: 600px;
-  text-align: center;
+  text-align: left;
+}
+
+@media (max-width: 767px) {
+  .profileBio {
+    text-align: center;
+  }
 }
 
 .profileMediums {
@@ -340,12 +350,24 @@
 /* Icon sizing and hover */
 .icon {
   font-size: 1.75rem;
-  color: #fff;
-  transition: transform 0.2s;
+  /* Default icon color inherited from brand configs */
+  transition: transform 0.2s, filter 0.2s;
+  filter: brightness(1);
 }
 .icon:hover {
   transform: scale(1.15);
+  filter: brightness(1.5);
 }
+
+/* Muted colors for social icons */
+.iconLine a:nth-child(1) .icon { color: #c6cfd7; } /* Email */
+.iconLine a:nth-child(2) .icon { color: #708596; } /* Phone */
+.iconLine a:nth-child(3) .icon { color: #5294C1; } /* Twitter */
+.iconLine a:nth-child(4) .icon { color: hsl(336, 55%, 63%); } /* LinkedIn */
+.iconLine a:nth-child(5) .icon { color: #3c30e1; } /* Instagram brand color */
+
+/* Muted accent color for mediums text */
+.profileMediums { color: #5282db; }
 
 /* Responsive adjustments for mobile */
 @media (max-width: 768px) {

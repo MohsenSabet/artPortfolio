@@ -24,7 +24,9 @@ export default function About({ profile }) {
       <div className={styles.aboutWrapper}>
         <TunnelBackground />
         <div className={styles.aboutContent}>
-          <h1 className={styles.pageTitle}>About</h1>
+          <h1 className={styles.pageTitle}>
+            {first_name} {last_name}{pronouns && <span className={styles.pronouns}> ({pronouns})</span>}
+          </h1>
           <StarField />
           <div className={styles.profileInfo}>
             <div className={styles.profileImageContainer}>
@@ -54,8 +56,6 @@ export default function About({ profile }) {
               </div>
             </div>
             <div className={styles.profileText}>
-              {/* Name with pronouns */}
-              <h2 className={styles.profileName}>{`${first_name} ${last_name}${pronouns ? ` (${pronouns})` : ''}`}</h2>
               {/* Bio */}
               <p className={styles.profileBio}>{bio}</p>
               {/* Mediums */}
