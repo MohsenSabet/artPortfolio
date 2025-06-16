@@ -304,8 +304,8 @@ export default function Portfolio({ posts, profile }) {
               cursor: isDragging ? 'grabbing' : 'grab',
               touchAction: 'none'
             }}
-            onMouseDown={e => { e.stopPropagation(); setIsDragging(true); setLastPos({ x: e.clientX, y: e.clientY }); }}
-            onMouseMove={e => {
+            onPointerDown={e => { e.stopPropagation(); setIsDragging(true); setLastPos({ x: e.clientX, y: e.clientY }); }}
+            onPointerMove={e => {
               if (isDragging) {
                 e.stopPropagation();
                 const dx = e.clientX - lastPos.x;
@@ -314,8 +314,8 @@ export default function Portfolio({ posts, profile }) {
                 setLastPos({ x: e.clientX, y: e.clientY });
               }
             }}
-            onMouseUp={e => { e.stopPropagation(); setIsDragging(false); }}
-            onMouseLeave={e => { e.stopPropagation(); setIsDragging(false); }}
+            onPointerUp={e => { e.stopPropagation(); setIsDragging(false); }}
+            onPointerCancel={e => { e.stopPropagation(); setIsDragging(false); }}
             onClick={e => e.stopPropagation()}
           />
         </div>
