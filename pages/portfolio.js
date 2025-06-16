@@ -31,7 +31,11 @@ export default function Portfolio({ posts, profile }) {
   // helper to format custom post date consistently
   const formatDate = (dateStr) => {
     const d = new Date(dateStr);
-    return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+    const months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
   };
 
   /* --- slide-by-slide animation (no scrubbing) --- */
