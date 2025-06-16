@@ -18,6 +18,14 @@ const TunnelBackground = dynamic(
 );
 
 export default function Portfolio({ posts, profile }) {
+  // modal/lightbox state
+  const [modalImage, setModalImage] = useState(null);
+  const [scale, setScale] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
+
   // back-to-top always visible, no toggle state needed
 
   // helper to format custom post date consistently
@@ -142,6 +150,21 @@ export default function Portfolio({ posts, profile }) {
     };
   }, [posts]);
 
+  // Disable page scroll when modal is open
+  useEffect(() => {
+    if (modalImage) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [modalImage]);
+
   /* --------------- JSX --------------- */
   return (
     <>
@@ -199,6 +222,12 @@ export default function Portfolio({ posts, profile }) {
                 src={post.media_url}
                 alt={post.title}
                 className="slide-image"
+                onClick={() => {
+                  setModalImage(post.media_url);
+                  setScale(1);
+                  setRotation(0);
+                  setPan({ x: 0, y: 0 });
+                }}
               />
             )}
             <div className="slide-text">
@@ -243,6 +272,50 @@ export default function Portfolio({ posts, profile }) {
       >
         <img src="/images/portfilio/arrow.gif" alt="Back to Top" width="32" height="32" />
       </button>
+
+      {/* modal overlay for full-screen image */}
+      {modalImage && (
+        <div
+          className="modal-overlay"
+          onClick={() => setModalImage(null)}
+          onWheel={e => {
+            e.stopPropagation();
+            const delta = e.deltaY < 0 ? 0.1 : -0.1;
+            setScale(s => Math.min(Math.max(s + delta, 0.25), 5));
+          }}
+        >
+          <div className="modal-controls" onClick={e => e.stopPropagation()}>
+            <button className="modal-btn" onClick={() => setScale(s => s + 0.25)} title="Zoom In">+</button>
+            <button className="modal-btn" onClick={() => setScale(s => Math.max(s - 0.25, 0.25))} title="Zoom Out">–</button>
+            <button className="modal-btn" onClick={() => setRotation(r => r - 90)} title="Rotate Left">⟲</button>
+            <button className="modal-btn" onClick={() => setRotation(r => r + 90)} title="Rotate Right">⟳</button>
+            <button className="modal-btn" onClick={() => setModalImage(null)} title="Close">✕</button>
+          </div>
+          <img
+            src={modalImage}
+            alt=""
+            className="modal-content"
+            style={{
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale}) rotate(${rotation}deg)`,
+              cursor: isDragging ? 'grabbing' : 'grab',
+              touchAction: 'none'
+            }}
+            onMouseDown={e => { e.stopPropagation(); setIsDragging(true); setLastPos({ x: e.clientX, y: e.clientY }); }}
+            onMouseMove={e => {
+              if (isDragging) {
+                e.stopPropagation();
+                const dx = e.clientX - lastPos.x;
+                const dy = e.clientY - lastPos.y;
+                setPan(p => ({ x: p.x + dx, y: p.y + dy }));
+                setLastPos({ x: e.clientX, y: e.clientY });
+              }
+            }}
+            onMouseUp={e => { e.stopPropagation(); setIsDragging(false); }}
+            onMouseLeave={e => { e.stopPropagation(); setIsDragging(false); }}
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
+      )}
 
       {/* end of page content */}
     </>

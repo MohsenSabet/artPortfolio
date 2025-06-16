@@ -147,10 +147,6 @@ const portfolioStyles = css.global`
     opacity: 0;
     animation: fadeInUp 1s ease-out 0.5s forwards;
   }
-  .intro-content:hover h1 {
-    transform: scale(1.02);
-    transition: transform 0.3s ease;
-  }
   .intro-content h1 {
     font-family: "Playfair Display", serif;
     font-size: 2rem;
@@ -201,6 +197,86 @@ const portfolioStyles = css.global`
     max-height: 90%;
     object-fit: cover;
     flex-shrink: 0;
+    transition: transform 0.3s, filter 0.3s;
+  }
+  .slide-image:hover {
+    transform: scale(1.05);
+    filter: brightness(1.1) drop-shadow(0 0 8px rgba(255,255,255,0.5));
+  }
+
+  /* modal overlay for full-screen image */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0,0,0,0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    cursor: default;
+    overscroll-behavior: contain;
+  }
+  .modal-controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 10001;
+  }
+  .modal-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: background 0.3s, transform 0.2s;
+  }
+  .modal-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
+  }
+  .modal-content {
+    max-width: 90%;
+    max-height: 90%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    transition: transform 0.3s;
+  }
+
+  /* close button styling in modal */
+  .modal-close-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: #fff;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10002;
+    transition: background 0.3s, transform 0.2s;
+  }
+  .modal-close-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
   }
 
   /* artist info section styling */
