@@ -13,7 +13,8 @@ export default function About({ profile }) {
   }
 
   // Destructure profile data
-  const { first_name, last_name, avatar_url, bio, mediums, twitter, linkedin, instagram, username, pronouns, email, phone } = profile;
+  const { first_name, last_name, avatar_url, bio, mediums, twitter, linkedin, instagram, username, pronouns, email, phone,
+          show_email, show_phone, show_twitter, show_linkedin, show_instagram } = profile;
 
   // These are the image filenames in your /public/images/about/ folder
   const numbers = [3, 4, 5, 6, 7, 8, 9, 10, 11];
@@ -36,19 +37,19 @@ export default function About({ profile }) {
                 className={styles.profileImage}
               />
               <div className={styles.iconLine}>
-                {email && <a href={`mailto:${email}`}><FaEnvelope className={styles.icon} /></a>}
-                {phone && <a href={`tel:${phone}`}><FaPhone className={styles.icon} /></a>}
-                {twitter && (
+                {show_email    && email     && <a href={`mailto:${email}`}><FaEnvelope className={styles.icon} /></a>}
+                {show_phone    && phone     && <a href={`tel:${phone}`}><FaPhone className={styles.icon} /></a>}
+                {show_twitter  && twitter   && (
                   <a href={twitter} target="_blank" rel="noopener noreferrer">
                     <FaTwitter className={styles.icon} />
                   </a>
                 )}
-                {linkedin && (
+                {show_linkedin && linkedin  && (
                   <a href={linkedin} target="_blank" rel="noopener noreferrer">
                     <FaLinkedin className={styles.icon} />
                   </a>
                 )}
-                {instagram && (
+                {show_instagram && instagram && (
                   <a href={instagram} target="_blank" rel="noopener noreferrer">
                     <FaInstagram className={styles.icon} />
                   </a>
@@ -93,7 +94,10 @@ export default function About({ profile }) {
 export async function getStaticProps() {
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('first_name,last_name,username,pronouns,email,phone,avatar_url,bio,mediums,twitter,linkedin,instagram')
+    .select(
+      `first_name,last_name,username,pronouns,email,phone,avatar_url,bio,mediums,twitter,linkedin,instagram,
+       show_email,show_phone,show_twitter,show_linkedin,show_instagram`
+    )
     .limit(1)
     .single();
 

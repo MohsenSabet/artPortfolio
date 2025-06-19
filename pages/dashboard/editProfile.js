@@ -33,6 +33,12 @@ export default function EditProfile() {
   const [pwError, setPwError] = useState(null);
   const [pwSuccess, setPwSuccess] = useState(false);
   const [showPwModal, setShowPwModal] = useState(false);
+  // add visibility toggles for About page
+  const [showEmail, setShowEmail] = useState(true);
+  const [showPhone, setShowPhone] = useState(true);
+  const [showTwitter, setShowTwitter] = useState(true);
+  const [showLinkedIn, setShowLinkedIn] = useState(true);
+  const [showInstagram, setShowInstagram] = useState(true);
 
   // Preset medium options
   const presetMediums = ['Painting', 'Illustration', 'Photography', 'Digital', 'Other'];
@@ -71,6 +77,12 @@ export default function EditProfile() {
         setInstagram(data.instagram || '');
         setMediums(data.mediums ? data.mediums.split(',') : []);
         setPortfolioIntro(data.portfolio_intro || '');
+        // initialize visibility flags
+        setShowEmail(data.show_email ?? true);
+        setShowPhone(data.show_phone ?? true);
+        setShowTwitter(data.show_twitter ?? true);
+        setShowLinkedIn(data.show_linkedin ?? true);
+        setShowInstagram(data.show_instagram ?? true);
       }
       setLoading(false);
     }
@@ -135,7 +147,13 @@ export default function EditProfile() {
       linkedin: linkedIn,
       instagram,
       mediums: mediums.join(','),
-      portfolio_intro: portfolioIntro
+      portfolio_intro: portfolioIntro,
+      // add visibility fields
+      show_email: showEmail,
+      show_phone: showPhone,
+      show_twitter: showTwitter,
+      show_linkedin: showLinkedIn,
+      show_instagram: showInstagram
     };
     const { data: updated, error } = await supabase
       .from('profiles')
@@ -308,6 +326,40 @@ export default function EditProfile() {
                   />
                 </Col>
               </Row>
+            </Form.Group>
+
+            <Form.Group controlId="privacySettings" className="mb-3">
+              <Form.Label>About Page Visibility</Form.Label>
+              <Form.Check
+                type="checkbox"
+                label="Show Email"
+                checked={showEmail}
+                onChange={e => setShowEmail(e.target.checked)}
+              />
+              <Form.Check
+                type="checkbox"
+                label="Show Phone"
+                checked={showPhone}
+                onChange={e => setShowPhone(e.target.checked)}
+              />
+              <Form.Check
+                type="checkbox"
+                label="Show Twitter"
+                checked={showTwitter}
+                onChange={e => setShowTwitter(e.target.checked)}
+              />
+              <Form.Check
+                type="checkbox"
+                label="Show LinkedIn"
+                checked={showLinkedIn}
+                onChange={e => setShowLinkedIn(e.target.checked)}
+              />
+              <Form.Check
+                type="checkbox"
+                label="Show Instagram"
+                checked={showInstagram}
+                onChange={e => setShowInstagram(e.target.checked)}
+              />
             </Form.Group>
 
             <Form.Group controlId="mediums" className="mb-4">
