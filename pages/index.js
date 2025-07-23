@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo, } from 'react';
-import { motion } from 'framer-motion';
+import { motion, animate } from 'framer-motion';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import CombinedScene from '@/components/CombinedScene';
@@ -89,70 +89,74 @@ export default function Home() {
            initial="closed"
            animate={menuOpen ? 'open' : 'closed'}
            onClick={isMobile ? () => setMenuOpen(prev => !prev) : undefined}
-           onHoverStart={() => { bgSpeed.set(10); if (!isMobile) setMenuOpen(true); }}
-           onHoverEnd={() => { bgSpeed.set(0.2); if (!isMobile) setMenuOpen(false); }}
-         >
-          {/* Clickable menu trigger (transparent circle) */}
-          <motion.div
-            variants={{ open: {}, closed: {} }}
-            transformTemplate={(transformProps, transform) => `translate(-50%, -50%) ${transform}`}
-            style={{ position: 'absolute', top: '50%', left: '50%', zIndex: 1 }}
-            animate={{ y: [0, -10, 0] }}
-            transition={{ duration: 4, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }}
-          >
-            <motion.div variants={{ open: { opacity: 0 }, closed: { opacity: 1 } }} transition={{ duration: 0.3 }} style={{ pointerEvents: 'none' }}>
-              <Image priority src="/images/home/UFo1.png" alt="UFO1" width={260} height={260} />
-            </motion.div>
-            <motion.div variants={{ open: { opacity: 1 }, closed: { opacity: 0 } }} style={{ position: 'absolute', top: 0, left: 0, opacity: 0, pointerEvents: 'none' }} transition={{ duration: 0.3 }}>
-              <Image src="/images/home/Ufo2.PNG" alt="UFO2" width={260} height={260} />
-            </motion.div>
-            <motion.div 
-              variants={{
-                open: {
-                  opacity: 1,
-                  filter: 'brightness(1.8) sepia(0.4) saturate(1.5)',
-                  transition: { duration: 1, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }
-                },
-                closed: {
-                  opacity: 0,
-                  filter: 'brightness(1.2) sepia(0.2) saturate(1.2)'
-                }
-              }}
-              style={{ position: 'absolute', top: 0, left: 0, opacity: 0, pointerEvents: 'none', filter: 'brightness(1.2) sepia(0.2) saturate(1.2)' }}
-            >
-              <Image src="/images/home/Ufo3.PNG" alt="UFO3" width={260} height={260} />
-            </motion.div>
-          </motion.div>
-           {/* Three buttons around the globe on hover */}
-           {options.map((option, idx) => (
-             <motion.div
-               key={option.label}
-               custom={idx}
-               variants={itemVariants}
-               transformTemplate={(transformProps, transform) => `translate(-50%, -50%) ${transform}`}
-               style={{
-                 position: 'absolute', top: '50%', left: '50%',
-                 background: 'rgba(255, 255, 255, 0.22)',
-                 backdropFilter: 'blur(10px)',
-                 WebkitBackdropFilter: 'blur(10px)',
-                 border: '1px solid rgba(255, 255, 255, 0.12)',
-                 borderRadius: '50%', width: 80, height: 80,
-                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                 boxShadow: '0 8px 16px rgba(0, 0, 0, 0)', cursor: 'pointer'
-               }}
-               whileHover={{
-                 scale: 1.2,
-                 background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(241, 236, 207, 0.87) 100%)',
-                 boxShadow: '0 0 26px rgba(255, 255, 255, 0.95), 0 0 32px rgba(255, 255, 255, 0.4)',
-               }}
-             >
-               <Link href={option.href} style={{ color: '#000', textDecoration: 'none', fontSize: isMobile? '0.8rem':'1rem' }}>
-                 {option.label}
-               </Link>
-             </motion.div>
-           ))}
-         </motion.div>
-       </div>
-     </div>
-   );
+           onHoverStart={() => { 
+            animate(bgSpeed, 10, { duration: 1 });
+             if (!isMobile) setMenuOpen(true);
+           }}
+           onHoverEnd={() => { 
+            animate(bgSpeed, 0.2, { duration: 1 });
+             if (!isMobile) setMenuOpen(false);
+           }} >
+  {/* Clickable menu trigger (transparent circle) */}
+  <motion.div
+    variants={{ open: {}, closed: {} }}
+    transformTemplate={(transformProps, transform) => `translate(-50%, -50%) ${transform}`} 
+    style={{ position: 'absolute', top: '50%', left: '50%', zIndex: 1 }}
+    animate={{ y: [0, -10, 0] }}
+    transition={{ duration: 4, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }}
+  >
+    <motion.div variants={{ open: { opacity: 0 }, closed: { opacity: 1 } }} transition={{ duration: 0.3 }} style={{ pointerEvents: 'none' }}>
+      <Image priority src="/images/home/UFo1.png" alt="UFO1" width={260} height={260} />
+    </motion.div>
+    <motion.div variants={{ open: { opacity: 1 }, closed: { opacity: 0 } }} style={{ position: 'absolute', top: 0, left: 0, opacity: 0, pointerEvents: 'none' }} transition={{ duration: 0.3 }}>
+      <Image src="/images/home/Ufo2.PNG" alt="UFO2" width={260} height={260} />
+    </motion.div>
+    <motion.div
+      variants={{
+        open: {
+          opacity: 1,
+          filter: 'brightness(1.8) sepia(0.4) saturate(1.5)',
+          transition: { duration: 1, repeat: Infinity, repeatType: 'mirror', ease: 'easeInOut' }
+        },
+        closed: {
+          opacity: 0,
+          filter: 'brightness(1.2) sepia(0.2) saturate(1.2)'
+        }
+      }}
+      style={{ position: 'absolute', top: 0, left: 0, opacity: 0, pointerEvents: 'none', filter: 'brightness(1.2) sepia(0.2) saturate(1.2)' }}
+    >
+      <Image src="/images/home/Ufo3.PNG" alt="UFO3" width={260} height={260} />
+    </motion.div>
+  </motion.div>
+  {options.map((option, idx) => (
+    <motion.div
+      key={option.label}
+      custom={idx}
+      variants={itemVariants}
+      transformTemplate={(transformProps, transform) => `translate(-50%, -50%) ${transform}`} 
+      style={{
+        position: 'absolute', top: '50%', left: '50%',
+        background: 'rgba(255, 255, 255, 0.22)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        border: '1px solid rgba(255, 255, 255, 0.12)',
+        borderRadius: '50%', width: 80, height: 80,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        boxShadow: '0 8px 16px rgba(0, 0, 0, 0)', cursor: 'pointer'
+      }}
+      whileHover={{
+        scale: 1.2,
+        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(241, 236, 207, 0.87) 100%)',
+        boxShadow: '0 0 26px rgba(255, 255, 255, 0.95), 0 0 32px rgba(255, 255, 255, 0.4)',
+      }}
+    >
+      <Link href={option.href} style={{ color: '#000', textDecoration: 'none', fontSize: isMobile? '0.8rem':'1rem' }}>
+        {option.label}
+      </Link>
+    </motion.div>
+  ))}
+</motion.div>
+</div>
+</div>
+);
 }
